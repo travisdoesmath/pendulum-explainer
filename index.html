@@ -4,24 +4,57 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
     <title>Chaotic Pendulums</title>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="https://d3js.org/d3.v6.min.js"></script>
 </head>
 <body>
-    <svg width="450" height="450">
-        <line x1="50" y1="0" x2="50", y2="450" stroke="black" opacity="0.5"></line>
-        <line x1="0" y1="50" x2="450", y2="50" stroke="black" opacity="0.5"></line>
-    </svg>
-    $$x_i = \sum_{j=1}^i\sin(\theta_j), \quad y_i = -\sum_{j=1}^i\cos(\theta_j)$$
-    $$\dot{x}_i = \sum_{j=1}^i\dot{\theta}_j\sin(\theta_j), \quad \dot{y}_i = \sum_{j=1}^i\dot{\theta}_j\cos(\theta_j),$$
-    $$ L = T - V $$
-    $$\begin{eqnarray}
-    T &=& \frac{1}{2}\sum_{i=1}^n m_i v_i^2 \\
-     &=& \frac{1}{2}\sum_{i=1}^n(\dot{x}_i^2 + \dot{y}_i^2) \\
-     &=& \frac{1}{2}\dot{\theta}_1^2 + \frac{1}{2}\left[\dot{\theta}_1^2 + \dot{\theta}_2^2 + \dot{\theta}_1\dot{\theta}_2
-        \cos(\theta_1 - \theta_2)\right]
-    \end{eqnarray}$$
+    <div class="column">
+        <h1>Simulating n-tuple pendulums using the Lagrangian formulation </h1>
+        <svg width="475" height="425">
+            <line x1="50" y1="0" x2="50", y2="425" stroke="#888" stroke-width="3"></line>
+            <line x1="0" y1="50" x2="475", y2="50" stroke="#888" stroke-width="3"></line>
+            <circle cx="50" cy="50" r="4" fill="#888"></circle>
+        </svg>
+        $$x_i = \sum_{j=1}^i\sin\theta_j, \quad y_i = -\sum_{j=1}^i\cos\theta_j$$
+        $$\dot{x}_i = \sum_{j=1}^i\dot{\theta}_j\cos\theta_j, \quad \dot{y}_i = -\sum_{j=1}^i\dot{\theta}_j\sin\theta_j$$
+        <hr>
+        $$ L = T - V $$
+        <hr>
+        $$\begin{eqnarray}
+        T &=& \frac{1}{2}\sum_{i=1}^n m_i v_i^2 \\
+        &=& \frac{1}{2}\sum_{i=1}^n(\dot{x}_i^2 + \dot{y}_i^2) \\
+        &=& \frac{1}{2}\sum_{i=1}^n \left( \left[\sum_{j=1}^i\dot{\theta}_j\sin\theta_j\right]^2 + \left[ \sum_{j=1}^i\dot{\theta}_j\cos\theta_j \right]^2 \right) \\
+        &=& \frac{1}{2}\sum_{i=1}^n \left( \left[\sum_{j=1}^i\dot{\theta}_j\sin\theta_j\right]^2 + \left[ \sum_{j=1}^i\dot{\theta}_j\cos\theta_j \right]^2 \right) \\
+        &=& \frac{1}{2}\sum_{i=1}^n \left( \sum_{j=1}^i \sum_{k=1}^i \dot{\theta}_j\dot{\theta}_k\sin\theta_j\sin\theta_k + \sum_{j=1}^i \sum_{k=1}^i \dot{\theta}_j\dot{\theta}_k\cos\theta_j\sin\theta_k \right)\\
+        &=& \frac{1}{2}\sum_{i=1}^n \left( \sum_{j=1}^i \dot{\theta}_j^2 (\sin^2\theta_j^2 + \cos^2\theta_j^2) + 2\sum_{j = 1}^i\sum_{k = 1}^{j-1} \dot{\theta}_j\dot{\theta}_k(\sin\theta_j\sin\theta_k + \cos\theta_j\cos\theta_k) \right) \\
+        &=& \frac{1}{2}\sum_{i=1}^n \left( \sum_{j=1}^i \dot{\theta}_j^2 + 2\sum_{j = 1}^i\sum_{k = 1}^{j-1} \dot{\theta}_j\dot{\theta}_k\cos(\theta_j - \theta_k) \right) \\
+        &=& \frac{1}{2}\sum_{i=1}^n(n-i+1)\dot{\theta}_i^2 + \sum_{i=1}^n\sum_{j=1}^i\sum_{k=1}^{j-1}\dot{\theta}_j\dot{\theta}_k\cos(\theta_j - \theta_k) \\
+        &=& \frac{1}{2}\sum_{i=1}^n(n-i+1)\dot{\theta}_i^2 + \sum_{j=1}^n\sum_{k=1}^j(n - j + 1)\dot{\theta}_j\dot{\theta}_k\cos(\theta_j - \theta_k) \\
+        \end{eqnarray}$$
+        <hr>
+        $$\begin{eqnarray}
+        V &=& \sum_{i=1}^nm_igy_i \\
+          &=& -g\sum_{i=1}^n\sum_{j=1}^i\dot{\theta}_j\sin\theta_j \\
+          &=& -g\sum_{i=1}^n(n-i+1)\dot{\theta}_i\sin\theta_i \\
+        \end{eqnarray}$$
+        <hr>
+        $$\frac{d}{dt}\left(\frac{\partial L}{\partial \dot{\theta}_i}\right) - \frac{\partial L}{\partial \theta_i} = 0$$
+        <hr>
+        $$\begin{eqnarray}
+        L &=& \frac{1}{2}\sum_{i=1}^n(n-i+1)\dot{\theta}_i^2 + \sum_{i=1}^n\sum_{j=1}^i(n - i + 1)\dot{\theta}_i\dot{\theta}_j\cos(\theta_i - \theta_j) + g\sum_{i=1}^n(n-i+1)\dot{\theta}_i\sin\theta_i \\
+          &=& \frac{1}{2}\sum_{i=1}^n(n-i+1)\left[\dot{\theta}_i^2 + g\dot{\theta}_i\sin\theta_i + \sum_{j=1}^{i}\dot{\theta}_i\dot{\theta}_j\cos(\theta_i - \theta_j) \right]
+        \end{eqnarray}$$
+        <hr>
+        $$\frac{\partial L}{\partial \dot{\theta}_i} = \frac{1}{2}\sum_{i=1}^n(n-i+1)\left[2\dot{\theta}_i + g\sin\theta_i + \sum_{j=1}^{i}\dot{\theta}_j\cos(\theta_i - \theta_j) \right] $$
+        $$\frac{d}{dt}\left(\frac{\partial L}{\partial \dot{\theta}_i}\right) = \frac{1}{2}\sum_{i=1}^n(n-i+1)\left[
+            2\ddot{\theta}_i + g\ddot{\theta}_i\cos\theta_i + \sum_{j=1}^{i}\left[
+                \ddot{\theta}_j\cos(\theta_i - \theta_j) + \dot{\theta}_j\dot{\theta}_i\sin(\theta_i - \theta_j) - \dot{\theta}_j^2\sin(\theta_i - \theta_j)
+                \right]
+            \right]
+        $$
+    </div>
     <script>
         let arc = d3.arc()
 
@@ -68,7 +101,7 @@
                 .attr('y2', y2)
                 .attr('stroke', 'black')
                 .attr('stroke-width', 3)
-
+                .attr('stroke-linecap',"round")
             if (i == 2) {
                 line.attr('stroke-dasharray', '4,10')
             }
@@ -77,8 +110,9 @@
                 .attr('cx', x2)
                 .attr('cy', y2)
                 .attr('r', 10)
-                .attr('fill', '#F88')
-                .attr('stroke', 'black')
+                .attr('fill', '#F66')
+                .attr('stroke', '#B00')
+                .attr('stroke-width', 1.5)
 
             let xLabel = g.append('text')
                 .attr('x', x2)
