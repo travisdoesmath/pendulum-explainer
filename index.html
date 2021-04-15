@@ -11,12 +11,58 @@
 </head>
 <body>
     <div class="column">
-        <h1>Simulating n-tuple pendulums using the Lagrangian formulation </h1>
-        <svg width="475" height="425">
-            <line x1="50" y1="0" x2="50", y2="425" stroke="#888" stroke-width="3"></line>
-            <line x1="0" y1="50" x2="475", y2="50" stroke="#888" stroke-width="3"></line>
-            <circle cx="50" cy="50" r="4" fill="#888"></circle>
-        </svg>
+        <h1>Building an n-tuple pendulum simulator from scratch</h1>
+        <section id="caveat">
+            <p>
+                caveat: I am not a physicist, computer scientist, software engineer, or web developer. Once upon a time I knew some math, but now
+                I am mostly just an intensely curious person. I've learned enough to make this work, and now I'd like to share it with you.
+            </p>
+        </section>
+        <section id="overview-english">
+            <h2>Overview (in plain English)</h2>
+            <p>We will be building a simulator that runs on a webpage and animates the movement of an n-tuple pendulum.</p>
+            <ul>
+                <li>First, we will define the physical system that describes the motion of an n-tuple pendulum.</li>
+                <li>Then we will create a JavaScript program that solves the equations of motion and animates a given n-tuple pendulum.</li>
+                <li>Finally, we will speed up the simulation by moving the math out of JavaScript and into WebAssembly, using the Rust programming language.</li>
+            </ul>
+        </section>
+        <section id="overview-technobabble">
+            <h2>Overview (in techno-babble)</h2>
+            <p>We will be building a simulator that runs on a webpage and animates the movement of an n-tuple pendulum.</p>
+            <ul>
+                <li>First, we will use a Lagrangian formulation to describe the equations of motion for an n-tuple pendulum. For ease of coding and solving, the equations of motion will be defined in a matrix equation \(Ax = b\).</li>
+                <li>Then we will create a JavaScript program that uses a Runge-Kutta method (RK4) to numerically solve the system of differential equations obtained in step 1 and 
+                    animate the simulation using the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/canvas">canvas element</a></li>
+                <li>Finally, we will speed up the simulation by moving the RK4 solver out of JavaScript and into Rust, targeting WebAssembly</li>
+            </ul>
+        </section>
+        <section id="but-why">
+            <h2>But, why?</h2>
+            <p>Great question! Regular, single pendulums are a simple physical system that can be solved analytically (I think). Probably very good for learning
+                the basics of physical modeling and simulation, but pretty boring.
+            </p>    
+            <p>Double pendulums are also a reasonably simple physical system to describe, but they are an example of a <a href="https://en.wikipedia.org/wiki/Chaos_theory">chaotic system</a>. 
+                Mathematically, this means that they show <a href="https://en.wikipedia.org/wiki/Butterfly_effect">sensitive dependence to initial conditions.</a>. Visually, this means they look hypnotically awesome.
+                However, there are thousands of double pendulum simulators out there. 
+            </p>
+            <p>Triple pendulums have pretty gnarly equations of motion when you solve for them directly, and it's not <em>that</em> much more work to just solve for the general case and set
+                \(n = 3\), so we might as well just do the little bit of extra work and figure out the general case.
+            </p>
+        </section>
+        <section id="lets-go">
+            <h2>Let's go!</h2>
+        </section>
+        <h2>Step 1: Equations of Motion</h2>
+        <figure>
+            <svg width="475" height="425" alt='Diagram of n-tuple pendulum' id="diagram">
+                <line x1="50" y1="0" x2="50", y2="425" stroke="#888" stroke-width="3"></line>
+                <line x1="0" y1="50" x2="475", y2="50" stroke="#888" stroke-width="3"></line>
+                <circle cx="50" cy="50" r="4" fill="#888"></circle>
+            </svg>
+            <figcaption>Diagram of coordinates of an n-tuple pendulum</figcaption>
+        </figure>
+
         $$x_i = \sum_{j=1}^i\sin\theta_j, \quad y_i = -\sum_{j=1}^i\cos\theta_j$$
         $$\dot{x}_i = \sum_{j=1}^i\dot{\theta}_j\cos\theta_j, \quad \dot{y}_i = \sum_{j=1}^i\dot{\theta}_j\sin\theta_j$$
         $$g = -9.8$$
@@ -32,13 +78,6 @@
             + \sum_{j \neq k}2\dot{\theta}_j\dot{\theta}_k\sin\theta_j\sin\theta_k\right) \\
           &=& \frac{1}{2}\sum_{i=1}^n \left(\sum_{j=1}^n\dot{\theta}_j^2 + \sum_{j \neq k}2\dot{\theta}_j\dot{\theta}_k\cos(\theta_j - \theta_k) \right) \\
           &=& \sum_{i=1}^n \left(\sum_{j=1}^n\frac{1}{2}\dot{\theta}_j^2 + \sum_{j \neq k}\dot{\theta}_j\dot{\theta}_k\cos(\theta_j - \theta_k) \right)
-          <!-- &=& \frac{1}{2}\sum_{i=1}^n \left( \left[\sum_{j=1}^i\dot{\theta}_j\cos\theta_j\right]^2 + \left[ \sum_{j=1}^i\dot{\theta}_j\sin\theta_j \right]^2 \right) \\
-          &=& \frac{1}{2}\sum_{i=1}^n \left( \sum_{j=1}^i \sum_{k=1}^i \dot{\theta}_j\dot{\theta}_k\cos\theta_j\cos\theta_k 
-                                           + \sum_{j=1}^i \sum_{k=1}^i \dot{\theta}_j\dot{\theta}_k\sin\theta_j\sin\theta_k \right) \\
-          &=& \frac{1}{2}\sum_{i=1}^n \sum_{j=1}^i \sum_{k=1}^i \dot{\theta}_j\dot{\theta}_k\cos(\theta_j - \theta_k) \\
-          &=& \frac{1}{2}\sum_{j=1}^n\sum_{k=1}^{j}(n - j + 1)\dot{\theta}_j\dot{\theta}_k\cos(\theta_j - \theta_k) \\
-          &=& \frac{1}{2}\sum_{i=1}^n\sum_{j=1}^{i}(n - i + 1)\dot{\theta}_i\dot{\theta}_j\cos(\theta_i - \theta_j) \\ -->
-          <!-- &=& \frac{1}{2}\sum_{i=1}^n(n-i+1)\dot{\theta}_i^2 + \sum_{\substack{i=1\ldots n \\ j=1\ldots n \\ i \neq j}}(n - i + 1)\dot{\theta}_i\dot{\theta}_j\cos(\theta_i - \theta_j) \\ -->
         \end{eqnarray}$$
         <hr>
         $$\begin{eqnarray}
@@ -49,7 +88,6 @@
         <hr>
         $$\begin{eqnarray}
         L &=& T - V = \sum_{i=1}^n \left(\sum_{j=1}^n\frac{1}{2}\dot{\theta}_j^2 + \sum_{j \neq k}\dot{\theta}_j\dot{\theta}_k\cos(\theta_j - \theta_k) \right) + g\sum_{i=1}^n(n-i+1)\cos\theta_i \\
-          <!-- &=& \sum_{i=1}^{n}(n - i + 1)\left(g\cos\theta_i + \frac{1}{2}\sum_{j=1}^{i}\dot{\theta}_i\dot{\theta}_j\cos(\theta_i - \theta_j) \right) -->
         \end{eqnarray}$$
         <hr>
         $$\frac{d}{dt}\left(\frac{\partial L}{\partial \dot{\theta}_i}\right) - \frac{\partial L}{\partial \theta_i} = 0$$
@@ -76,160 +114,7 @@
             &\implies& \sum_{j=1}^{n}c(i,j)\left[\ddot{\theta}_j\cos(\theta_i - \theta_j) - \dot{\theta}_j^2\sin(\theta_i - \theta_j) \right] - (n - i + 1)g\dot{\theta}_i\sin\theta_i = 0 \\
             &\implies& \sum_{j=1}^{n}c(i,j)\ddot{\theta}_j\cos(\theta_i - \theta_j) = g(n - i + 1)\dot{\theta}_i\sin\theta_i + \sum_{j=1}^{n}c(i,j)\dot{\theta}_j^2\sin(\theta_i - \theta_j)
         \end{eqnarray}$$
-
-
     </div>
-    <script>
-        let arc = d3.arc()
-
-        let x1 = 0;
-        let y1 = 0;
-
-        let coords = [
-        {
-            theta: 0.2 * Math.PI,
-            l: 125
-            },
-            {
-            theta: 0.325 * Math.PI,
-            l: 125
-            },
-            {
-            theta: 0.1   * Math.PI,
-            l: 175
-            },
-            {
-            theta: 0.35 * Math.PI,
-            l: 125
-            }
-        ];
-
-        let l = 125;
-
-        let g = d3.select('svg').append('g')
-            .attr('transform', 'translate(50,50)')
-
-        let rods = d3.select('svg').append('g')
-            .attr('transform', 'translate(50,50)')
-
-        let bobs = d3.select('svg').append('g')
-            .attr('transform', 'translate(50,50)')
-
-        for (let i = 0; i < coords.length; i++) {
-            let x2 = x1 + coords[i].l * Math.cos(coords[i].theta);
-            let y2 = y1 + coords[i].l * Math.sin(coords[i].theta);
-            let line = rods.append('line')
-                .attr('x1', x1)
-                .attr('y1', y1)
-                .attr('x2', x2)
-                .attr('y2', y2)
-                .attr('stroke', 'black')
-                .attr('stroke-width', 3)
-                .attr('stroke-linecap',"round")
-            if (i == 2) {
-                line.attr('stroke-dasharray', '4,10')
-            }
-
-            bobs.append('circle')
-                .attr('cx', x2)
-                .attr('cy', y2)
-                .attr('r', 10)
-                .attr('fill', '#F66')
-                .attr('stroke', '#B00')
-                .attr('stroke-width', 1.5)
-
-            let xLabel = g.append('text')
-                .attr('x', x2)
-                .attr('dy', '-1em')
-                .attr('text-anchor', 'middle')
-                .attr('font-style', 'italic')
-
-            xLabel.append('tspan')
-                .attr('font-size', '1.25em')
-                .text('x')
-    
-            xLabel.append('tspan')
-                .attr('baseline-shift', 'sub')
-                .attr('font-size', '.75em')
-                .text(() => {
-                    if (i == coords.length - 1) return 'n'
-                    else if (i == coords.length - 2) return 'n-1'
-                    else return (i + 1)
-                })
-
-            let yLabel = g.append('text')
-                .attr('y', y2)
-                .attr('dx', '-1.25em')
-                .attr('text-anchor', 'middle')
-                .attr('font-style', 'italic')
-
-            yLabel.append('tspan')
-                .attr('font-size', '1.25em')
-                .text('y')
-    
-            yLabel.append('tspan')
-                .attr('baseline-shift', 'sub')
-                .attr('font-size', '.75em')
-                .text(() => {
-                    if (i == coords.length - 1) return 'n'
-                    else if (i == coords.length - 2) return 'n-1'
-                    else return (i + 1)
-                })
-
-                
-            g.append('line')
-                .attr('x1', x2)
-                .attr('y1', 0)
-                .attr('x2', x2)
-                .attr('y2', (i == 1) || (i == 3) ? y2 : y2 + 75)
-                .attr('stroke', 'black')
-                .attr('stroke-dasharray', '3,3')
-
-            g.append('line')
-                .attr('x1', 0)
-                .attr('y1', y2)
-                .attr('x2', x2)
-                .attr('y2', y2)
-                .attr('stroke', 'black')
-                .attr('stroke-dasharray', '3,3')
-
-            if (i !== 2) {
-                g.append('path')
-                    .attr('d', arc({
-                        innerRadius:40,
-                        outerRadius:41,
-                        startAngle: 0.5*Math.PI + coords[i].theta,
-                        endAngle: Math.PI
-                    }))
-                    .attr('transform', `translate(${x1},${y1})`)
-                    .attr('fill', 'black')
-
-                let thetaText = g.append('text')
-                    .attr('transform', `translate(${x1 + 50 * Math.cos(0.25*Math.PI + 0.5*coords[i].theta)-5},
-                    ${y1 + 50 * Math.sin(0.25*Math.PI + 0.5*coords[i].theta) + 15})`)
-                    .attr('font-style', 'italic')
-                
-                thetaText.append('tspan')
-                    .attr('font-size', '1.25em')
-                    .text('θ')
-
-                thetaText.append('tspan')
-                    .attr('baseline-shift', 'sub')
-                    .attr('font-size', '.75em')
-                    .attr('font-weight', 900)
-                    .text(i == coords.length - 1 ? 'n' : (i + 1))
-
-            }
-            
-
-            x1 = x2;
-            y1 = y2;
-
-        }
-
-
-
-        
-    </script>
+    <script src="main.js"></script>
 </body>
 </html>

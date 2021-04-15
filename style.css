@@ -27,3 +27,24 @@ h2 {
 h1, h2 {
     text-rendering: optimizeLegibility;
 }
+
+svg {
+    display: block;
+    margin: auto;
+}
+
+#caveat {
+    background-color: #FAA;
+}
+
+#caveat>p {
+    padding: 1rem;
+}
+
+#lets-go {
+    background-color: #AFA;
+}
+
+#lets-go>h2 {
+    padding: 1rem;
+}
