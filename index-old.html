@@ -18,63 +18,48 @@
             <circle cx="50" cy="50" r="4" fill="#888"></circle>
         </svg>
         $$x_i = \sum_{j=1}^i\sin\theta_j, \quad y_i = -\sum_{j=1}^i\cos\theta_j$$
-        $$\dot{x}_i = \sum_{j=1}^i\dot{\theta}_j\cos\theta_j, \quad \dot{y}_i = \sum_{j=1}^i\dot{\theta}_j\sin\theta_j$$
-        $$g = -9.8$$
+        $$\dot{x}_i = \sum_{j=1}^i\dot{\theta}_j\cos\theta_j, \quad \dot{y}_i = -\sum_{j=1}^i\dot{\theta}_j\sin\theta_j$$
         <hr>
         $$ L = T - V $$
         <hr>
         $$\begin{eqnarray}
         T &=& \frac{1}{2}\sum_{i=1}^n m_i v_i^2 \\
-          &=& \frac{1}{2}\sum_{i=1}^n(\dot{x}_i^2 + \dot{y}_i^2) \\
-          &=& \frac{1}{2}\sum_{i=1}^n \left( \left[\sum_{j=1}^i\dot{\theta}_j\cos\theta_j\right]^2 + \left[ \sum_{j=1}^i\dot{\theta}_j\sin\theta_j \right]^2 \right) \\
-          &=& \frac{1}{2}\sum_{i=1}^n \left(\sum_{j=1}^n\dot{\theta}_j^2 
-            + \sum_{j \neq k}2\dot{\theta}_j\dot{\theta}_k\cos\theta_j\cos\theta_k 
-            + \sum_{j \neq k}2\dot{\theta}_j\dot{\theta}_k\sin\theta_j\sin\theta_k\right) \\
-          &=& \frac{1}{2}\sum_{i=1}^n \left(\sum_{j=1}^n\dot{\theta}_j^2 + \sum_{j \neq k}2\dot{\theta}_j\dot{\theta}_k\cos(\theta_j - \theta_k) \right) \\
-          &=& \sum_{i=1}^n \left(\sum_{j=1}^n\frac{1}{2}\dot{\theta}_j^2 + \sum_{j \neq k}\dot{\theta}_j\dot{\theta}_k\cos(\theta_j - \theta_k) \right)
-          <!-- &=& \frac{1}{2}\sum_{i=1}^n \left( \left[\sum_{j=1}^i\dot{\theta}_j\cos\theta_j\right]^2 + \left[ \sum_{j=1}^i\dot{\theta}_j\sin\theta_j \right]^2 \right) \\
-          &=& \frac{1}{2}\sum_{i=1}^n \left( \sum_{j=1}^i \sum_{k=1}^i \dot{\theta}_j\dot{\theta}_k\cos\theta_j\cos\theta_k 
-                                           + \sum_{j=1}^i \sum_{k=1}^i \dot{\theta}_j\dot{\theta}_k\sin\theta_j\sin\theta_k \right) \\
-          &=& \frac{1}{2}\sum_{i=1}^n \sum_{j=1}^i \sum_{k=1}^i \dot{\theta}_j\dot{\theta}_k\cos(\theta_j - \theta_k) \\
-          &=& \frac{1}{2}\sum_{j=1}^n\sum_{k=1}^{j}(n - j + 1)\dot{\theta}_j\dot{\theta}_k\cos(\theta_j - \theta_k) \\
-          &=& \frac{1}{2}\sum_{i=1}^n\sum_{j=1}^{i}(n - i + 1)\dot{\theta}_i\dot{\theta}_j\cos(\theta_i - \theta_j) \\ -->
-          <!-- &=& \frac{1}{2}\sum_{i=1}^n(n-i+1)\dot{\theta}_i^2 + \sum_{\substack{i=1\ldots n \\ j=1\ldots n \\ i \neq j}}(n - i + 1)\dot{\theta}_i\dot{\theta}_j\cos(\theta_i - \theta_j) \\ -->
+        &=& \frac{1}{2}\sum_{i=1}^n(\dot{x}_i^2 + \dot{y}_i^2) \\
+        &=& \frac{1}{2}\sum_{i=1}^n \left( \left[\sum_{j=1}^i\dot{\theta}_j\sin\theta_j\right]^2 + \left[ \sum_{j=1}^i\dot{\theta}_j\cos\theta_j \right]^2 \right) \\
+        &=& \frac{1}{2}\sum_{i=1}^n \left( \left[\sum_{j=1}^i\dot{\theta}_j\sin\theta_j\right]^2 + \left[ \sum_{j=1}^i\dot{\theta}_j\cos\theta_j \right]^2 \right) \\
+        &=& \frac{1}{2}\sum_{i=1}^n \left( \sum_{j=1}^i \sum_{k=1}^i \dot{\theta}_j\dot{\theta}_k\sin\theta_j\sin\theta_k + \sum_{j=1}^i \sum_{k=1}^i \dot{\theta}_j\dot{\theta}_k\cos\theta_j\sin\theta_k \right)\\
+        &=& \frac{1}{2}\sum_{i=1}^n \left( \sum_{j=1}^i \dot{\theta}_j^2 (\sin^2\theta_j^2 + \cos^2\theta_j^2) + 2\sum_{j = 1}^i\sum_{k = 1}^{j-1} \dot{\theta}_j\dot{\theta}_k(\sin\theta_j\sin\theta_k + \cos\theta_j\cos\theta_k) \right) \\
+        &=& \frac{1}{2}\sum_{i=1}^n \left( \sum_{j=1}^i \dot{\theta}_j^2 + 2\sum_{j = 1}^i\sum_{k = 1}^{j-1} \dot{\theta}_j\dot{\theta}_k\cos(\theta_j - \theta_k) \right) \\
+        &=& \frac{1}{2}\sum_{i=1}^n(n-i+1)\dot{\theta}_i^2 + \sum_{i=1}^n\sum_{j=1}^i\sum_{k=1}^{j-1}\dot{\theta}_j\dot{\theta}_k\cos(\theta_j - \theta_k) \\
+        &=& \frac{1}{2}\sum_{i=1}^n(n-i+1)\dot{\theta}_i^2 + \sum_{j=1}^n\sum_{k=1}^j(n - j + 1)\dot{\theta}_j\dot{\theta}_k\cos(\theta_j - \theta_k) \\
         \end{eqnarray}$$
         <hr>
         $$\begin{eqnarray}
         V &=& \sum_{i=1}^nm_igy_i \\
-          &=& -g\sum_{i=1}^n\sum_{j=1}^i\cos\theta_j \\
-          &=& -g\sum_{i=1}^n(n-i+1)\cos\theta_i \\
-        \end{eqnarray}$$
-        <hr>
-        $$\begin{eqnarray}
-        L &=& T - V = \sum_{i=1}^n \left(\sum_{j=1}^n\frac{1}{2}\dot{\theta}_j^2 + \sum_{j \neq k}\dot{\theta}_j\dot{\theta}_k\cos(\theta_j - \theta_k) \right) + g\sum_{i=1}^n(n-i+1)\cos\theta_i \\
-          <!-- &=& \sum_{i=1}^{n}(n - i + 1)\left(g\cos\theta_i + \frac{1}{2}\sum_{j=1}^{i}\dot{\theta}_i\dot{\theta}_j\cos(\theta_i - \theta_j) \right) -->
+          &=& -g\sum_{i=1}^n\sum_{j=1}^i\dot{\theta}_j\sin\theta_j \\
+          &=& -g\sum_{i=1}^n(n-i+1)\dot{\theta}_i\sin\theta_i \\
         \end{eqnarray}$$
         <hr>
         $$\frac{d}{dt}\left(\frac{\partial L}{\partial \dot{\theta}_i}\right) - \frac{\partial L}{\partial \theta_i} = 0$$
         <hr>
-        $$\frac{\partial L}{\partial \dot{\theta}_i} = \sum_{j=1}^{n}c(i,j)\dot{\theta}_j\cos(\theta_i - \theta_j), \quad 
-        c(i, j) = n - \max(i, j) + 1 = \left\{
-            \begin{array}{lll}
-                (n - i + 1) & \mbox{if } j \lt i \\
-                (n - i + 1) & \mbox{if } j = i \\
-                (n - j + 1) & \mbox{if } j \gt i
-            \end{array}
-        \right.$$
-
-        $$\frac{d}{dt}\left(\frac{\partial L}{\partial \dot{\theta}_i}\right) = 
-            \sum_{j=1}^{n}c(i,j)\left[\ddot{\theta}_j\cos(\theta_i - \theta_j) - \dot{\theta}_i\dot{\theta}_j\sin(\theta_i - \theta_j) - \dot{\theta}_j^2\sin(\theta_i - \theta_j) \right]
+        $$\begin{eqnarray}
+        L &=& \sum_{i=1}^n\frac{(n-i+1)}{2}\dot{\theta}_i^2 + \sum_{i=1}^n\sum_{j=1}^i(n - i + 1)\dot{\theta}_i\dot{\theta}_j\cos(\theta_i - \theta_j) + g\sum_{i=1}^n(n-i+1)\dot{\theta}_i\sin\theta_i \\
+          &=& \sum_{i=1}^n(n-i+1)\left[\frac{1}{2}\dot{\theta}_i^2 + g\dot{\theta}_i\sin\theta_i + \sum_{j=1}^{i}\dot{\theta}_i\dot{\theta}_j\cos(\theta_i - \theta_j) \right]
+        \end{eqnarray}$$
+        <hr>
+        $$\frac{\partial L}{\partial \dot{\theta}_i} = \sum_{i=1}^n(n-i+1)\left[\dot{\theta}_i + g\sin\theta_i + \sum_{j=1}^{i}\dot{\theta}_j\cos(\theta_i - \theta_j) \right] $$
+        $$\frac{d}{dt}\left(\frac{\partial L}{\partial \dot{\theta}_i}\right) = \sum_{i=1}^n(n-i+1)\left[
+            \ddot{\theta}_i + g\ddot{\theta}_i\cos\theta_i + \sum_{j=1}^{i}\left[
+                \ddot{\theta}_j\cos(\theta_i - \theta_j) + \dot{\theta}_j\dot{\theta}_i\sin(\theta_i - \theta_j) - \dot{\theta}_j^2\sin(\theta_i - \theta_j)
+                \right]
+            \right]
         $$
         <hr>
-        $$\frac{\partial L}{\partial \theta_i} = g(n - i + 1)\sin\theta_i - \sum_{j=1}^nc(i,j)\dot{\theta}_i\dot{\theta}_j\sin(\theta_i - \theta_j)$$
-        <hr>
+        setting \(\frac{d}{dt}\left(\frac{\partial L}{\partial \dot{\theta}_i}\right) - \frac{\partial L}{\partial \theta_i} = 0\) and moving 2nd derivative terms to the left hand side and all other terms to the right hand side, we get
+
         $$\begin{eqnarray}
-        && \frac{d}{dt}\left(\frac{\partial L}{\partial \dot{\theta}_i}\right) - \frac{\partial L}{\partial \theta_i} = 0 \\
-            &\implies& \sum_{j=1}^{n}c(i,j)\left[\ddot{\theta}_j\cos(\theta_i - \theta_j) - \dot{\theta}_i\dot{\theta}_j\sin(\theta_i - \theta_j) - \dot{\theta}_j^2\sin(\theta_i - \theta_j) \right]
-            - (n - i + 1)g\dot{\theta}_i\sin\theta_i + \sum_{j=1}^nc(i,j)\dot{\theta}_i\dot{\theta}_j\sin(\theta_i - \theta_j) = 0 \\
-            &\implies& \sum_{j=1}^{n}c(i,j)\left[\ddot{\theta}_j\cos(\theta_i - \theta_j) - \dot{\theta}_j^2\sin(\theta_i - \theta_j) \right] - (n - i + 1)g\dot{\theta}_i\sin\theta_i = 0 \\
-            &\implies& \sum_{j=1}^{n}c(i,j)\ddot{\theta}_j\cos(\theta_i - \theta_j) = g(n - i + 1)\dot{\theta}_i\sin\theta_i + \sum_{j=1}^{n}c(i,j)\dot{\theta}_j^2\sin(\theta_i - \theta_j)
+        \sum{i=1}{n}(n - i + 1)\left(\right)
+
         \end{eqnarray}$$
 
 
