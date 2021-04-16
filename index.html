@@ -113,6 +113,17 @@
             We will represent this with the definition \(V = \sum_{i=1}^{n} gm_iy_i\) where \(g\) is the acceleration factor due to gravity, \(m_i\) is still the mass of each object, 
             and \(y_i\) is the y&#8209;position, or height, of each object.
         </p>
+        <p>
+            With the Lagrangian \(L\) defined, we use the following Euler-Lagrange equations to give us the equations of motion of the system:
+            $$ \frac{d}{dt}\left(\frac{\partial L}{\partial \dot{q}_i}\right) = \frac{\partial L}{\partial q_i} $$
+            where \(q_i\) represents some point in the system. Note: the Lagrangian may be defined in terms of abstract quantities in a 
+            <a href="https://en.wikipedia.org/wiki/Phase_space">phase space</a> describing the system. For example, we will be using the phase space of angles and angular velocities
+            in our formulation for the n-tuple pendulum.
+        </p>
+        <p>
+            Now we are ready to describe the equations of motion for the n-tuple pendulum.
+        </p>
+        <h3>Lagrangian formulation of the n-tuple pendulum</h3>
         <figure>
             <svg width="475" height="425" alt='Diagram of n-tuple pendulum' id="diagram">
                 <line x1="50" y1="0" x2="50", y2="425" stroke="#888" stroke-width="3"></line>
