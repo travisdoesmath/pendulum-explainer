@@ -5,6 +5,10 @@ body {
     -webkit-text-size-adjust: none;
   }
 
+p, li {
+    line-height: 1.6rem;
+}
+
 .column {
     max-width: 960px;
     position: relative;
@@ -28,9 +32,21 @@ h1, h2 {
     text-rendering: optimizeLegibility;
 }
 
-svg {
-    display: block;
+figure {
+    display: flex;
+    flex-flow: column;
+    margin:auto;
+}
+
+figure>svg {
     margin: auto;
+}
+
+figcaption {
+    /* background-color: #222;
+    color: #fff; */
+    font-style: italic;
+    text-align: center;
 }
 
 #caveat {

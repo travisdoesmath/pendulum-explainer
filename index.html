@@ -53,7 +53,66 @@
         <section id="lets-go">
             <h2>Let's go!</h2>
         </section>
-        <h2>Step 1: Equations of Motion</h2>
+        <h2>Step 1: Equations of motion</h2>
+        <p>
+            To simulate the movement of some physical system, we want to be able to take any snapshot of time and predict where it will move next (and how fast). 
+            For example, if we toss a ball into the air, after it leaves our hand, at any given snapshot of time, the ball has some position (where it is), velocity 
+            (how fast it's going), and acceleration (how the velocity is changing). With that information, we can predict where the ball will be a short time after. 
+            If the ball is 2 meters (6.56 feet) in the air and moving straight up at 1 meters per second (6.71 mph), then one tenth of a second later, it will be 
+            approximately 2.1 meters (6.89 feet) in the air. We can get an even better approximation if we include the acceleration, but more on that later.
+        </p>
+        <p>
+            For a given physical system, if we had a function that took in any given time value and spit out the positions of elements in the physical system, we'd be done!
+            All we'd have to do then is draw the points of the physical system at their starting point, increase the time value a little bit, and then redraw the points of the 
+            physical system at their new locations, and do that <a href="https://en.wikipedia.org/wiki/Persistence_of_vision">fast enough to make it look like it's moving</a>.           
+        </p>
+        <p>
+            Unfortunately, we rarely have a function that just tells us the position at a given time. Instead, what we can do is figure out rules to describe what is happening for
+            every possible snapshot of the physical system (that is, the position of all the points in the system, their velocity, and their acceleration), and use that to determine
+            the next snapshot. One way of defining those rules is called <em><a href="https://en.wikipedia.org/wiki/Lagrangian_mechanics">Lagrangian mechanics</a></em>.
+        </p>
+        <h3>A little bit of math notation</h3>
+        <p>
+            It's about to get heavy with math formulas pretty soon, so before we jump into Lagrangian mechanics, so let's be clear about the notation we're using before moving 
+            on. Also, we're going to be relying on quite a bit of calculus, so if you aren't familiar with calculus, the math section is going to make a lot of logical jumps that 
+            probably won't make sense to you. If you want to go research calculus on your own, the topics we'll be using are the sum rule, the power rule, the product rule, the 
+            chain rule, derivatives of sine and cosine, and partial derivatives.
+        </p>
+        <p>
+            <ul>
+                <li>
+                    \(\sum_{i=1}^{n}[\ldots]\) is <a href="https://en.wikipedia.org/wiki/Summation#Capital-sigma_notation">capital-sigma notation</a> for summation. This says
+                    to sum up whatever is in \([\ldots]\) where \(i\) counts up from \(1\) to \(n\). \(i\) is the <em>index</em> that we use to keep track of each object.
+                </li>
+                <li>
+                    \(f(t)\) is a function that takes \(t\) as an input, and outputs some transformed value. We just use \(f(t)\) to refer to the output. Functions can be 
+                    written with any name for their input variable (often \(x\)), but in this context, \(t\) almost always means time.
+                </li>
+                <li>
+                    \(\frac{d}{dt}f(t)\) is the derivative of \(f(t)\) with respect to \(t\). Here, \(t\) means time.
+                </li>
+                <li>
+                    \(\dot{f}\) (notice the little dot!) is another way of writing the derivative of \(f\) with respect to time. We often use this when talking about values that 
+                    are dependent on time, but where writing them as functions would be cumbersome. 
+                </li>
+                <li>
+                    \(\ddot{f}\) (notice the two little dots!) is the second derivative of \(f\) with respect to time.
+                </li>
+                <li>
+                    \(\frac{\partial A}{\partial x}\) is the partial derivative of a multivariate function or expression \(A\) with respect to the variable \(x\)
+                </li>
+            </ul>
+        </p>
+        <h3>Lagrangian mechanics</h3>
+        <p>
+            In Lagrangian mechanics, we start with the difference of the kinetic energy (\(T\)) and the potential energy (\(V)\) of the physical system. This difference is called the
+            <em>Lagrangian</em> (\(L = T - V\)). The kinetic energy of a system is defined as \(\frac{1}{2}\sum_{i=1}^{n}m_iv_i^2\) where \(m_i\) is the mass of each object (the \(i\) 
+            is an index to keep track of each obect) and \(v_i^2\) is the squared magnitude of the velocity of each object. For pendulum systems, we're only going to worry
+            about the gravitational potential energy. If two objects have the same mass, but one is higher up than the other, then the object that is higher up has more gravitational 
+            potential energy. If two objects are at the same height, but one is more massive than the other, then the more massive object has more gravitational potential energy.
+            We will represent this with the definition \(V = \sum_{i=1}^{n} gm_iy_i\) where \(g\) is the acceleration factor due to gravity, \(m_i\) is still the mass of each object, 
+            and \(y_i\) is the y&#8209;position, or height, of each object.
+        </p>
         <figure>
             <svg width="475" height="425" alt='Diagram of n-tuple pendulum' id="diagram">
                 <line x1="50" y1="0" x2="50", y2="425" stroke="#888" stroke-width="3"></line>
