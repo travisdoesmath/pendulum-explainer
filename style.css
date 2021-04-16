@@ -47,6 +47,7 @@ figcaption {
     color: #fff; */
     font-style: italic;
     text-align: center;
+    padding: .5rem;
 }
 
 #caveat {

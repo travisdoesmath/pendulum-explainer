@@ -53,137 +53,175 @@
         <section id="lets-go">
             <h2>Let's go!</h2>
         </section>
-        <h2>Step 1: Equations of motion</h2>
-        <p>
-            To simulate the movement of some physical system, we want to be able to take any snapshot of time and predict where it will move next (and how fast). 
-            For example, if we toss a ball into the air, after it leaves our hand, at any given snapshot of time, the ball has some position (where it is), velocity 
-            (how fast it's going), and acceleration (how the velocity is changing). With that information, we can predict where the ball will be a short time after. 
-            If the ball is 2 meters (6.56 feet) in the air and moving straight up at 1 meters per second (6.71 mph), then one tenth of a second later, it will be 
-            approximately 2.1 meters (6.89 feet) in the air. We can get an even better approximation if we include the acceleration, but more on that later.
-        </p>
-        <p>
-            For a given physical system, if we had a function that took in any given time value and spit out the positions of elements in the physical system, we'd be done!
-            All we'd have to do then is draw the points of the physical system at their starting point, increase the time value a little bit, and then redraw the points of the 
-            physical system at their new locations, and do that <a href="https://en.wikipedia.org/wiki/Persistence_of_vision">fast enough to make it look like it's moving</a>.           
-        </p>
-        <p>
-            Unfortunately, we rarely have a function that just tells us the position at a given time. Instead, what we can do is figure out rules to describe what is happening for
-            every possible snapshot of the physical system (that is, the position of all the points in the system, their velocity, and their acceleration), and use that to determine
-            the next snapshot. One way of defining those rules is called <em><a href="https://en.wikipedia.org/wiki/Lagrangian_mechanics">Lagrangian mechanics</a></em>.
-        </p>
-        <h3>A little bit of math notation</h3>
-        <p>
-            It's about to get heavy with math formulas pretty soon, so before we jump into Lagrangian mechanics, so let's be clear about the notation we're using before moving 
-            on. Also, we're going to be relying on quite a bit of calculus, so if you aren't familiar with calculus, the math section is going to make a lot of logical jumps that 
-            probably won't make sense to you. If you want to go research calculus on your own, the topics we'll be using are the sum rule, the power rule, the product rule, the 
-            chain rule, derivatives of sine and cosine, and partial derivatives.
-        </p>
-        <p>
-            <ul>
-                <li>
-                    \(\sum_{i=1}^{n}[\ldots]\) is <a href="https://en.wikipedia.org/wiki/Summation#Capital-sigma_notation">capital-sigma notation</a> for summation. This says
-                    to sum up whatever is in \([\ldots]\) where \(i\) counts up from \(1\) to \(n\). \(i\) is the <em>index</em> that we use to keep track of each object.
-                </li>
-                <li>
-                    \(f(t)\) is a function that takes \(t\) as an input, and outputs some transformed value. We just use \(f(t)\) to refer to the output. Functions can be 
-                    written with any name for their input variable (often \(x\)), but in this context, \(t\) almost always means time.
-                </li>
-                <li>
-                    \(\frac{d}{dt}f(t)\) is the derivative of \(f(t)\) with respect to \(t\). Here, \(t\) means time.
-                </li>
-                <li>
-                    \(\dot{f}\) (notice the little dot!) is another way of writing the derivative of \(f\) with respect to time. We often use this when talking about values that 
-                    are dependent on time, but where writing them as functions would be cumbersome. 
-                </li>
-                <li>
-                    \(\ddot{f}\) (notice the two little dots!) is the second derivative of \(f\) with respect to time.
-                </li>
-                <li>
-                    \(\frac{\partial A}{\partial x}\) is the partial derivative of a multivariate function or expression \(A\) with respect to the variable \(x\)
-                </li>
-            </ul>
-        </p>
-        <h3>Lagrangian mechanics</h3>
-        <p>
-            In Lagrangian mechanics, we start with the difference of the kinetic energy (\(T\)) and the potential energy (\(V)\) of the physical system. This difference is called the
-            <em>Lagrangian</em> (\(L = T - V\)). The kinetic energy of a system is defined as \(\frac{1}{2}\sum_{i=1}^{n}m_iv_i^2\) where \(m_i\) is the mass of each object (the \(i\) 
-            is an index to keep track of each obect) and \(v_i^2\) is the squared magnitude of the velocity of each object. For pendulum systems, we're only going to worry
-            about the gravitational potential energy. If two objects have the same mass, but one is higher up than the other, then the object that is higher up has more gravitational 
-            potential energy. If two objects are at the same height, but one is more massive than the other, then the more massive object has more gravitational potential energy.
-            We will represent this with the definition \(V = \sum_{i=1}^{n} gm_iy_i\) where \(g\) is the acceleration factor due to gravity, \(m_i\) is still the mass of each object, 
-            and \(y_i\) is the y&#8209;position, or height, of each object.
-        </p>
-        <p>
-            With the Lagrangian \(L\) defined, we use the following Euler-Lagrange equations to give us the equations of motion of the system:
-            $$ \frac{d}{dt}\left(\frac{\partial L}{\partial \dot{q}_i}\right) = \frac{\partial L}{\partial q_i} $$
-            where \(q_i\) represents some point in the system. Note: the Lagrangian may be defined in terms of abstract quantities in a 
-            <a href="https://en.wikipedia.org/wiki/Phase_space">phase space</a> describing the system. For example, we will be using the phase space of angles and angular velocities
-            in our formulation for the n-tuple pendulum.
-        </p>
-        <p>
-            Now we are ready to describe the equations of motion for the n-tuple pendulum.
-        </p>
-        <h3>Lagrangian formulation of the n-tuple pendulum</h3>
-        <figure>
-            <svg width="475" height="425" alt='Diagram of n-tuple pendulum' id="diagram">
-                <line x1="50" y1="0" x2="50", y2="425" stroke="#888" stroke-width="3"></line>
-                <line x1="0" y1="50" x2="475", y2="50" stroke="#888" stroke-width="3"></line>
-                <circle cx="50" cy="50" r="4" fill="#888"></circle>
-            </svg>
-            <figcaption>Diagram of coordinates of an n-tuple pendulum</figcaption>
-        </figure>
-
-        $$x_i = \sum_{j=1}^i\sin\theta_j, \quad y_i = -\sum_{j=1}^i\cos\theta_j$$
-        $$\dot{x}_i = \sum_{j=1}^i\dot{\theta}_j\cos\theta_j, \quad \dot{y}_i = \sum_{j=1}^i\dot{\theta}_j\sin\theta_j$$
-        $$g = -9.8$$
-        <hr>
-        $$ L = T - V $$
-        <hr>
-        $$\begin{eqnarray}
-        T &=& \frac{1}{2}\sum_{i=1}^n m_i v_i^2 \\
-          &=& \frac{1}{2}\sum_{i=1}^n(\dot{x}_i^2 + \dot{y}_i^2) \\
-          &=& \frac{1}{2}\sum_{i=1}^n \left( \left[\sum_{j=1}^i\dot{\theta}_j\cos\theta_j\right]^2 + \left[ \sum_{j=1}^i\dot{\theta}_j\sin\theta_j \right]^2 \right) \\
-          &=& \frac{1}{2}\sum_{i=1}^n \left(\sum_{j=1}^n\dot{\theta}_j^2 
-            + \sum_{j \neq k}2\dot{\theta}_j\dot{\theta}_k\cos\theta_j\cos\theta_k 
-            + \sum_{j \neq k}2\dot{\theta}_j\dot{\theta}_k\sin\theta_j\sin\theta_k\right) \\
-          &=& \frac{1}{2}\sum_{i=1}^n \left(\sum_{j=1}^n\dot{\theta}_j^2 + \sum_{j \neq k}2\dot{\theta}_j\dot{\theta}_k\cos(\theta_j - \theta_k) \right) \\
-          &=& \sum_{i=1}^n \left(\sum_{j=1}^n\frac{1}{2}\dot{\theta}_j^2 + \sum_{j \neq k}\dot{\theta}_j\dot{\theta}_k\cos(\theta_j - \theta_k) \right)
-        \end{eqnarray}$$
-        <hr>
-        $$\begin{eqnarray}
-        V &=& \sum_{i=1}^nm_igy_i \\
-          &=& -g\sum_{i=1}^n\sum_{j=1}^i\cos\theta_j \\
-          &=& -g\sum_{i=1}^n(n-i+1)\cos\theta_i \\
-        \end{eqnarray}$$
-        <hr>
-        $$\begin{eqnarray}
-        L &=& T - V = \sum_{i=1}^n \left(\sum_{j=1}^n\frac{1}{2}\dot{\theta}_j^2 + \sum_{j \neq k}\dot{\theta}_j\dot{\theta}_k\cos(\theta_j - \theta_k) \right) + g\sum_{i=1}^n(n-i+1)\cos\theta_i \\
-        \end{eqnarray}$$
-        <hr>
-        $$\frac{d}{dt}\left(\frac{\partial L}{\partial \dot{\theta}_i}\right) - \frac{\partial L}{\partial \theta_i} = 0$$
-        <hr>
-        $$\frac{\partial L}{\partial \dot{\theta}_i} = \sum_{j=1}^{n}c(i,j)\dot{\theta}_j\cos(\theta_i - \theta_j), \quad 
-        c(i, j) = n - \max(i, j) + 1 = \left\{
-            \begin{array}{lll}
-                (n - i + 1) & \mbox{if } j \lt i \\
-                (n - i + 1) & \mbox{if } j = i \\
-                (n - j + 1) & \mbox{if } j \gt i
-            \end{array}
-        \right.$$
-
-        $$\frac{d}{dt}\left(\frac{\partial L}{\partial \dot{\theta}_i}\right) = 
-            \sum_{j=1}^{n}c(i,j)\left[\ddot{\theta}_j\cos(\theta_i - \theta_j) - \dot{\theta}_i\dot{\theta}_j\sin(\theta_i - \theta_j) - \dot{\theta}_j^2\sin(\theta_i - \theta_j) \right]
-        $$
-        <hr>
-        $$\frac{\partial L}{\partial \theta_i} = g(n - i + 1)\sin\theta_i - \sum_{j=1}^nc(i,j)\dot{\theta}_i\dot{\theta}_j\sin(\theta_i - \theta_j)$$
-        <hr>
-        $$\begin{eqnarray}
-        && \frac{d}{dt}\left(\frac{\partial L}{\partial \dot{\theta}_i}\right) - \frac{\partial L}{\partial \theta_i} = 0 \\
-            &\implies& \sum_{j=1}^{n}c(i,j)\left[\ddot{\theta}_j\cos(\theta_i - \theta_j) - \dot{\theta}_i\dot{\theta}_j\sin(\theta_i - \theta_j) - \dot{\theta}_j^2\sin(\theta_i - \theta_j) \right]
-            - (n - i + 1)g\dot{\theta}_i\sin\theta_i + \sum_{j=1}^nc(i,j)\dot{\theta}_i\dot{\theta}_j\sin(\theta_i - \theta_j) = 0 \\
-            &\implies& \sum_{j=1}^{n}c(i,j)\left[\ddot{\theta}_j\cos(\theta_i - \theta_j) - \dot{\theta}_j^2\sin(\theta_i - \theta_j) \right] - (n - i + 1)g\dot{\theta}_i\sin\theta_i = 0 \\
-            &\implies& \sum_{j=1}^{n}c(i,j)\ddot{\theta}_j\cos(\theta_i - \theta_j) = g(n - i + 1)\dot{\theta}_i\sin\theta_i + \sum_{j=1}^{n}c(i,j)\dot{\theta}_j^2\sin(\theta_i - \theta_j)
-        \end{eqnarray}$$
+        <section id="equations-of-motion">
+            <h2>Step 1: Equations of motion</h2>
+            <p>
+                To simulate the movement of some physical system, we want to be able to take any snapshot of time and predict where it will move next (and how fast). 
+                For example, if we toss a ball into the air, after it leaves our hand, at any given snapshot of time, the ball has some position (where it is), velocity 
+                (how fast it's going), and acceleration (how the velocity is changing). With that information, we can predict where the ball will be a short time after. 
+                If the ball is 2 meters (6.56 feet) in the air and moving straight up at 1 meters per second (6.71 mph), then one tenth of a second later, it will be 
+                approximately 2.1 meters (6.89 feet) in the air. We can get an even better approximation if we include the acceleration, but more on that later.
+            </p>
+            <p>
+                For a given physical system, if we had a function that took in any given time value and spit out the positions of elements in the physical system, we'd be done!
+                All we'd have to do then is draw the points of the physical system at their starting point, increase the time value a little bit, and then redraw the points of the 
+                physical system at their new locations, and do that <a href="https://en.wikipedia.org/wiki/Persistence_of_vision">fast enough to make it look like it's moving</a>.           
+            </p>
+            <p>
+                Unfortunately, we rarely have a function that just tells us the position at a given time. Instead, what we can do is figure out rules to describe what is happening for
+                every possible snapshot of the physical system (that is, the position of all the points in the system, their velocity, and their acceleration), and use that to determine
+                the next snapshot. One way of defining those rules is called <em><a href="https://en.wikipedia.org/wiki/Lagrangian_mechanics">Lagrangian mechanics</a></em>.
+            </p>
+            <h3>A little bit of math notation</h3>
+            <p>
+                It's about to get heavy with math formulas pretty soon, so before we jump into Lagrangian mechanics, so let's be clear about the notation we're using before moving 
+                on. Also, we're going to be relying on quite a bit of calculus, so if you aren't familiar with calculus, the math section is going to make a lot of logical jumps that 
+                probably won't make sense to you. If you want to go research calculus on your own, the topics we'll be using are the sum rule, the power rule, the product rule, the 
+                chain rule, derivatives of sine and cosine, and partial derivatives. At the end, we will also be referring to a little bit of linear algebra to describe our equations
+                of motion as a matrix equation \(A \boldsymbol{x} = \boldsymbol{b}\).
+            </p>
+            <p>
+                <ul>
+                    <li>
+                        \(\sum_{i=1}^{n}[\ldots]\) is <a href="https://en.wikipedia.org/wiki/Summation#Capital-sigma_notation">capital-sigma notation</a> for summation. This says
+                        to sum up whatever is in \([\ldots]\) where \(i\) counts up from \(1\) to \(n\). \(i\) is the <em>index</em> that we use to keep track of each object.
+                    </li>
+                    <li>
+                        \(f(t)\) is a function that takes \(t\) as an input, and outputs some transformed value. We just use \(f(t)\) to refer to the output. Functions can be 
+                        written with any name for their input variable (often \(x\)), but in this context, \(t\) almost always means time.
+                    </li>
+                    <li>
+                        \(\frac{d}{dt}f(t)\) is the derivative of \(f(t)\) with respect to \(t\). Here, \(t\) means time.
+                    </li>
+                    <li>
+                        \(\dot{f}\) (notice the little dot!) is another way of writing the derivative of \(f\) with respect to time. We often use this when talking about values that 
+                        are dependent on time, but where writing them as functions would be cumbersome. 
+                    </li>
+                    <li>
+                        \(\ddot{f}\) (notice the two little dots!) is the second derivative of \(f\) with respect to time.
+                    </li>
+                    <li>
+                        \(\frac{\partial A}{\partial x}\) is the partial derivative of a multivariate function or expression \(A\) with respect to the variable \(x\)
+                    </li>
+                </ul>
+            </p>
+            <h3>Lagrangian mechanics</h3>
+            <p>
+                In Lagrangian mechanics, we start with the difference of the kinetic energy (\(T\)) and the potential energy (\(V)\) of the physical system. This difference is called the
+                <em>Lagrangian</em> (\(L = T - V\)). The kinetic energy of a system is defined as \(\frac{1}{2}\sum_{i=1}^{n}m_iv_i^2\) where \(m_i\) is the mass of each object (the \(i\) 
+                is an index to keep track of each obect) and \(v_i^2\) is the squared magnitude of the velocity of each object. For pendulum systems, we're only going to worry
+                about the gravitational potential energy. If two objects have the same mass, but one is higher up than the other, then the object that is higher up has more gravitational 
+                potential energy. If two objects are at the same height, but one is more massive than the other, then the more massive object has more gravitational potential energy.
+                We will represent this with the definition \(V = \sum_{i=1}^{n} gm_iy_i\) where \(g\) is the acceleration factor due to gravity, \(m_i\) is still the mass of each object, 
+                and \(y_i\) is the y&#8209;position, or height, of each object.
+            </p>
+            <p>
+                With the Lagrangian \(L\) defined, we use the following Euler-Lagrange equations to give us the equations of motion of the system:
+                $$ \frac{d}{dt}\left(\frac{\partial L}{\partial \dot{q}_i}\right) = \frac{\partial L}{\partial q_i} $$
+                where \(q_i\) represents some point in the system. Note: the Lagrangian may be defined in terms of abstract quantities in a 
+                <a href="https://en.wikipedia.org/wiki/Phase_space">phase space</a> describing the system. For example, we will be using the phase space of angles and angular velocities
+                in our formulation for the n-tuple pendulum.
+            </p>
+            <p>
+                Now we are ready to describe the equations of motion for the n-tuple pendulum.
+            </p>
+            <h3>Lagrangian formulation of the n-tuple pendulum<sup><a href="#footnote-1">[1]</a></sup></h3>
+            <p>
+                For this simulation, we are describing a frictionless physical system of rods with zero mass and \(n\) bobs of equal mass. This means that the \(n\) bobs are the only 
+                point masses of the system. For ease of calculation, the length of each rod and the mass of each bob are defined as \(1\) appropriate arbitrary unit. The gravitational 
+                constant \(g\) is defined as \(-9.8\) meters per second per second.      
+            </p>
+            <p>
+                <a href="#figure-1">Figure 1</a> shows how we will define the coordinates of each bob based on the angles of each rod.
+            </p>
+            <figure id="figure-1">
+                <svg width="475" height="425" alt='Diagram of n-tuple pendulum' id="diagram">
+                    <line x1="50" y1="0" x2="50", y2="425" stroke="#888" stroke-width="3"></line>
+                    <line x1="0" y1="50" x2="475", y2="50" stroke="#888" stroke-width="3"></line>
+                    <circle cx="50" cy="50" r="4" fill="#888"></circle>
+                </svg>
+                <figcaption>Figure 1: Diagram of coordinates of an n-tuple pendulum</figcaption>
+            </figure>
+            <p>
+                The \(x\) and \(y\) coordinates of each bob are defined as follows:
+                $$x_i = \sum_{j=1}^i\sin\theta_j, \quad y_i = -\sum_{j=1}^i\cos\theta_j$$
+                $$\dot{x}_i = \sum_{j=1}^i\dot{\theta}_j\cos\theta_j, \quad \dot{y}_i = \sum_{j=1}^i\dot{\theta}_j\sin\theta_j$$    
+            </p>
+            <p>
+                The kinetic energy of the system is defined as follows:
+                $$\begin{eqnarray}
+                T &=& \frac{1}{2}\sum_{i=1}^n m_i v_i^2 \\
+                &=& \frac{1}{2}\sum_{i=1}^n(\dot{x}_i^2 + \dot{y}_i^2) \\
+                &=& \frac{1}{2}\sum_{i=1}^n \left( \left[\sum_{j=1}^i\dot{\theta}_j\cos\theta_j\right]^2 + \left[ \sum_{j=1}^i\dot{\theta}_j\sin\theta_j \right]^2 \right) \\
+                &=& \frac{1}{2}\sum_{i=1}^n \left(\sum_{j=1}^n\dot{\theta}_j^2 
+                    + \sum_{j \neq k}2\dot{\theta}_j\dot{\theta}_k\cos\theta_j\cos\theta_k 
+                    + \sum_{j \neq k}2\dot{\theta}_j\dot{\theta}_k\sin\theta_j\sin\theta_k\right) \\
+                &=& \frac{1}{2}\sum_{i=1}^n \left(\sum_{j=1}^n\dot{\theta}_j^2 + \sum_{j \neq k}2\dot{\theta}_j\dot{\theta}_k\cos(\theta_j - \theta_k) \right) \\
+                &=& \sum_{i=1}^n \left(\sum_{j=1}^n\frac{1}{2}\dot{\theta}_j^2 + \sum_{j \neq k}\dot{\theta}_j\dot{\theta}_k\cos(\theta_j - \theta_k) \right)
+                \end{eqnarray}$$    
+            </p>
+            <p>
+                The potential energy of the system is defined as follows:
+                $$\begin{eqnarray}
+                V &=& \sum_{i=1}^nm_igy_i \\
+                &=& -g\sum_{i=1}^n\sum_{j=1}^i\cos\theta_j \\
+                &=& -g\sum_{i=1}^n(n-i+1)\cos\theta_i \\
+                \end{eqnarray}$$
+            </p>
+            <p>
+                Thus the Lagrangian of the n-tuple pendulum is
+                $$\begin{eqnarray}
+                L &=& T - V = \sum_{i=1}^n \left(\sum_{j=1}^n\frac{1}{2}\dot{\theta}_j^2 + \sum_{j \neq k}\dot{\theta}_j\dot{\theta}_k\cos(\theta_j - \theta_k) \right) + g\sum_{i=1}^n(n-i+1)\cos\theta_i \\
+                \end{eqnarray}$$    
+            </p>
+            <p>
+                Now we use the Euler-Lagrange equations:
+                $$\frac{d}{dt}\left(\frac{\partial L}{\partial \dot{\theta}_i}\right) - \frac{\partial L}{\partial \theta_i} = 0$$
+            </p>
+            <p>
+                For the first term, we start by taking the partial derivative of the Lagrangian with respect to the angular velocities:
+                $$\frac{\partial L}{\partial \dot{\theta}_i} = \sum_{j=1}^{n}c(i,j)\dot{\theta}_j\cos(\theta_i - \theta_j), \quad c(i, j) = n - \max(i, j) + 1$$
+                Then we take the derivative of that result with respect to time:
+                $$\frac{d}{dt}\left(\frac{\partial L}{\partial \dot{\theta}_i}\right) = 
+                \sum_{j=1}^{n}c(i,j)\left[\ddot{\theta}_j\cos(\theta_i - \theta_j) - \dot{\theta}_i\dot{\theta}_j\sin(\theta_i - \theta_j) - \dot{\theta}_j^2\sin(\theta_i - \theta_j) \right]$$
+            </p>
+            <p>
+                Now, we will derive the second term of the Euler-Lagrange equation, taking the partial derivative of the Lagrangian with respect to the angles of the rods.
+                $$\frac{\partial L}{\partial \theta_i} = g(n - i + 1)\sin\theta_i - \sum_{j=1}^nc(i,j)\dot{\theta}_i\dot{\theta}_j\sin(\theta_i - \theta_j)$$
+            </p>
+            <p>
+                Finally, we can fill in both terms of the Euler-Lagrange equations.
+                $$\begin{eqnarray}
+                && \frac{d}{dt}\left(\frac{\partial L}{\partial \dot{\theta}_i}\right) - \frac{\partial L}{\partial \theta_i} = 0 \\
+                    &\implies& \sum_{j=1}^{n}c(i,j)\left[\ddot{\theta}_j\cos(\theta_i - \theta_j) - \dot{\theta}_i\dot{\theta}_j\sin(\theta_i - \theta_j) - \dot{\theta}_j^2\sin(\theta_i - \theta_j) \right]
+                    - (n - i + 1)g\dot{\theta}_i\sin\theta_i + \sum_{j=1}^nc(i,j)\dot{\theta}_i\dot{\theta}_j\sin(\theta_i - \theta_j) = 0 \\
+                \end{eqnarray}$$                
+                After doing some careful algebra on the terms, moving any term with a second derivative of the angles to the left-hand side, and any term without to the 
+                right-hand side, we get:
+                $$\begin{eqnarray}
+                    && \sum_{j=1}^{n}c(i,j)\left[\ddot{\theta}_j\cos(\theta_i - \theta_j) - \dot{\theta}_j^2\sin(\theta_i - \theta_j) \right] - (n - i + 1)g\dot{\theta}_i\sin\theta_i = 0 \\
+                    &=& \sum_{j=1}^{n}c(i,j)\ddot{\theta}_j\cos(\theta_i - \theta_j) = g(n - i + 1)\dot{\theta}_i\sin\theta_i + \sum_{j=1}^{n}c(i,j)\dot{\theta}_j^2\sin(\theta_i - \theta_j)
+                \end{eqnarray}$$   
+            </p>
+            <p>
+                The equations of motion can be written as a matrix equation \(A \boldsymbol{x} = \boldsymbol{b}\) where 
+                <ul>
+                    <li>\(A\) is an \(n \times n\) matrix where the \(i,j\) entry is \(c(i,j)\cos(\theta_i - \theta_j)\),</li>
+                    <li>\(\boldsymbol{x}\) is the vector of \(\ddot{\theta}_i\)'s,</li>
+                    <li>and \(\boldsymbol{b}\) is the vector of values \(g(n - i + 1)\dot{\theta}_i\sin\theta_i + \sum_{j=1}^{n}c(i,j)\dot{\theta}_j^2\sin(\theta_i - \theta_j)\) </li>
+                </ul> 
+            </p>
+            <p>
+                With the equations of motion defined, we can now move to coding the n-tuple pendulum simulation in JavaScript. Whew!
+            </p>
+        </section>
+        <section id="javascript">
+            <h2>Step 2: Coding it up in JavaScript</h2>
+        </section>
+        <section id="footnotes">
+            <hr>
+            <span id="footnote-1"><sup>[1]</sup>This derivation is indebted to <a href="https://diego.assencio.com/?index=1500c66ae7ab27bb0106467c68feebc6#post_1500c66ae7ab27bb0106467c68feebc6_fig_1">Diego Assencio's derivation of the Lagrangian for the double pendulum</a></span>
+        </section>
     </div>
     <script src="main.js"></script>
 </body>
