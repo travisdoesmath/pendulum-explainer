@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
     <title>Chaotic Pendulums</title>
+    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+    <link rel="stylesheet" href="style.css">
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/highlight.min.js"></script>
     <script src="https://d3js.org/d3.v6.min.js"></script>
 </head>
 <body>
@@ -194,13 +196,13 @@
                 $$\begin{eqnarray}
                 && \frac{d}{dt}\left(\frac{\partial L}{\partial \dot{\theta}_i}\right) - \frac{\partial L}{\partial \theta_i} = 0 \\
                     &\implies& \sum_{j=1}^{n}c(i,j)\left[\ddot{\theta}_j\cos(\theta_i - \theta_j) - \dot{\theta}_i\dot{\theta}_j\sin(\theta_i - \theta_j) - \dot{\theta}_j^2\sin(\theta_i - \theta_j) \right]
-                    - (n - i + 1)g\dot{\theta}_i\sin\theta_i + \sum_{j=1}^nc(i,j)\dot{\theta}_i\dot{\theta}_j\sin(\theta_i - \theta_j) = 0 \\
+                    - g(n - i + 1)\sin\theta_i + \sum_{j=1}^nc(i,j)\dot{\theta}_i\dot{\theta}_j\sin(\theta_i - \theta_j) = 0 \\
                 \end{eqnarray}$$                
                 After doing some careful algebra on the terms, moving any term with a second derivative of the angles to the left-hand side, and any term without to the 
                 right-hand side, we get:
                 $$\begin{eqnarray}
-                    && \sum_{j=1}^{n}c(i,j)\left[\ddot{\theta}_j\cos(\theta_i - \theta_j) - \dot{\theta}_j^2\sin(\theta_i - \theta_j) \right] - (n - i + 1)g\dot{\theta}_i\sin\theta_i = 0 \\
-                    &=& \sum_{j=1}^{n}c(i,j)\ddot{\theta}_j\cos(\theta_i - \theta_j) = g(n - i + 1)\dot{\theta}_i\sin\theta_i + \sum_{j=1}^{n}c(i,j)\dot{\theta}_j^2\sin(\theta_i - \theta_j)
+                    && \sum_{j=1}^{n}c(i,j)\left[\ddot{\theta}_j\cos(\theta_i - \theta_j) - \dot{\theta}_j^2\sin(\theta_i - \theta_j) \right] - g(n - i + 1)\sin\theta_i = 0 \\
+                    &=& \sum_{j=1}^{n}c(i,j)\ddot{\theta}_j\cos(\theta_i - \theta_j) = g(n - i + 1)\sin\theta_i + \sum_{j=1}^{n}c(i,j)\dot{\theta}_j^2\sin(\theta_i - \theta_j)
                 \end{eqnarray}$$   
             </p>
             <p>
@@ -217,12 +219,62 @@
         </section>
         <section id="javascript">
             <h2>Step 2: Coding it up in JavaScript</h2>
+            <p>
+                For this section, we're going to write all of our code for the browser, which means all you need is a text editor (I recommend 
+                <a href="https://code.visualstudio.com/">Visual Studio Code</a>, which is free and works well on Mac and Windows), and a browser, which you're probably using to 
+                view this page (if you're on a phone or tablet, I suggest you go to a computer. If you know how to code on a mobile device, you probably don't need my help at 
+                this point.)
+            </p>
+            <p>
+                I'm assuming you've done some coding before, so if you haven't, you might want to search for a "Hello World" tutorial in JavaScript to get started. I highly
+                recommend the <a href="https://developer.mozilla.org/en-US/">Mozilla Developer Network (MDN) Web Docs</a> as a reference for all things HTML, CSS, and JavaScript.
+            </p>
+            <p>
+                I recommend creating a coding projects folder that you can get to easily, preferably in your home/user directory. In that folder, create a new folder called 
+                <code>pendulum</code>, and create a new file inside of it named <code>index.html</code>. Open <code>index.html</code> inside your text editor, and paste the
+                following HTML code, and save.
+            </p>
+                
+                <pre>
+<code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta http-equiv="X-UA-Compatible" content="IE=edge"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/9.3.2/math.min.js"&gt;&lt;/script&gt;
+    &lt;title>Pendulum Simulator&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;canvas id="canvas" width="500" height="500"&gt;&lt;/canvas&gt;
+    &lt;script src="pendulum.js"&gt;&lt;/script&gt;
+    &lt;script src="index.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code>
+                </pre>
+            <p>
+                Note that in VS Code, most of this code is boilerplate code that can be created with the <a href="https://code.visualstudio.com/docs/editor/emmet">Emmet 
+                abbreviation</a> <code class="inline-code">!</code>.
+                <img src="emmet-html.gif">
+            </p>
+            <p>
+                This HTML code does the following:
+                <ul>
+                    <li>Creates the webpage with the standard elements (i.e. the <code>head</code>, <code>body</code>, <code>title</code>, etc.),</li>
+                    <li>loads the <a href="https://mathjs.org/">math.js</a> library we'll be using to do some of the math for us,</li>
+                    <li>and calls two JavaScript files: <code>pendulum.js</code> and <code>index.js</code></li>.
+                </ul>
+                The <code>pendulum.js</code> file will contain all the code that handles the pendulum simulation math, and <code>index.js</code> will contain all the code 
+                responsible for displaying and animating the simulation in our browser. We will create those files now.
+            </p>
         </section>
         <section id="footnotes">
             <hr>
+            <h4>Footnotes</h4>
             <span id="footnote-1"><sup>[1]</sup>This derivation is indebted to <a href="https://diego.assencio.com/?index=1500c66ae7ab27bb0106467c68feebc6#post_1500c66ae7ab27bb0106467c68feebc6_fig_1">Diego Assencio's derivation of the Lagrangian for the double pendulum</a></span>
         </section>
     </div>
+    <script>hljs.highlightAll();</script>
     <script src="main.js"></script>
 </body>
 </html>

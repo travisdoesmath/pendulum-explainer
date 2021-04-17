@@ -1,0 +1,1 @@
+let pendulum = new Pendulum();

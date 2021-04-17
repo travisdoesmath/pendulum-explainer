@@ -65,3 +65,13 @@ figcaption {
 #lets-go>h2 {
     padding: 1rem;
 }
+
+.inline-code {
+    background: #f0f0f0;
+    padding: .2rem;
+}
+
+img {
+    display: block;
+    margin: auto;
+}
