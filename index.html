@@ -185,24 +185,24 @@
                 $$\frac{\partial L}{\partial \dot{\theta}_i} = \sum_{j=1}^{n}c(i,j)\dot{\theta}_j\cos(\theta_i - \theta_j), \quad c(i, j) = n - \max(i, j) + 1$$
                 Then we take the derivative of that result with respect to time:
                 $$\frac{d}{dt}\left(\frac{\partial L}{\partial \dot{\theta}_i}\right) = 
-                \sum_{j=1}^{n}c(i,j)\left[\ddot{\theta}_j\cos(\theta_i - \theta_j) - \dot{\theta}_i\dot{\theta}_j\sin(\theta_i - \theta_j) - \dot{\theta}_j^2\sin(\theta_i - \theta_j) \right]$$
+                \sum_{j=1}^{n}c(i,j)\left[\ddot{\theta}_j\cos(\theta_i - \theta_j) - \dot{\theta}_i\dot{\theta}_j\sin(\theta_i - \theta_j) + \dot{\theta}_j^2\sin(\theta_i - \theta_j) \right]$$
             </p>
             <p>
                 Now, we will derive the second term of the Euler-Lagrange equation, taking the partial derivative of the Lagrangian with respect to the angles of the rods.
-                $$\frac{\partial L}{\partial \theta_i} = g(n - i + 1)\sin\theta_i - \sum_{j=1}^nc(i,j)\dot{\theta}_i\dot{\theta}_j\sin(\theta_i - \theta_j)$$
+                $$\frac{\partial L}{\partial \theta_i} = -g(n - i + 1)\sin\theta_i - \sum_{j=1}^nc(i,j)\dot{\theta}_i\dot{\theta}_j\sin(\theta_i - \theta_j)$$
             </p>
             <p>
                 Finally, we can fill in both terms of the Euler-Lagrange equations.
                 $$\begin{eqnarray}
                 && \frac{d}{dt}\left(\frac{\partial L}{\partial \dot{\theta}_i}\right) - \frac{\partial L}{\partial \theta_i} = 0 \\
-                    &\implies& \sum_{j=1}^{n}c(i,j)\left[\ddot{\theta}_j\cos(\theta_i - \theta_j) - \dot{\theta}_i\dot{\theta}_j\sin(\theta_i - \theta_j) - \dot{\theta}_j^2\sin(\theta_i - \theta_j) \right]
-                    - g(n - i + 1)\sin\theta_i + \sum_{j=1}^nc(i,j)\dot{\theta}_i\dot{\theta}_j\sin(\theta_i - \theta_j) = 0 \\
+                    &\implies& \sum_{j=1}^{n}c(i,j)\left[\ddot{\theta}_j\cos(\theta_i - \theta_j) - \dot{\theta}_i\dot{\theta}_j\sin(\theta_i - \theta_j) + \dot{\theta}_j^2\sin(\theta_i - \theta_j) \right]
+                    + g(n - i + 1)\sin\theta_i + \sum_{j=1}^nc(i,j)\dot{\theta}_i\dot{\theta}_j\sin(\theta_i - \theta_j) = 0 \\
                 \end{eqnarray}$$                
                 After doing some careful algebra on the terms, moving any term with a second derivative of the angles to the left-hand side, and any term without to the 
                 right-hand side, we get:
                 $$\begin{eqnarray}
-                    && \sum_{j=1}^{n}c(i,j)\left[\ddot{\theta}_j\cos(\theta_i - \theta_j) - \dot{\theta}_j^2\sin(\theta_i - \theta_j) \right] - g(n - i + 1)\sin\theta_i = 0 \\
-                    &=& \sum_{j=1}^{n}c(i,j)\ddot{\theta}_j\cos(\theta_i - \theta_j) = g(n - i + 1)\sin\theta_i + \sum_{j=1}^{n}c(i,j)\dot{\theta}_j^2\sin(\theta_i - \theta_j)
+                    && \sum_{j=1}^{n}c(i,j)\left[\ddot{\theta}_j\cos(\theta_i - \theta_j) + \dot{\theta}_j^2\sin(\theta_i - \theta_j) \right] + g(n - i + 1)\sin\theta_i = 0 \\
+                    &=& \sum_{j=1}^{n}c(i,j)\ddot{\theta}_j\cos(\theta_i - \theta_j) = -\sum_{j=1}^{n}\left[c(i,j)\dot{\theta}_j^2\sin(\theta_i - \theta_j)\right] - g(n - i + 1)\sin\theta_i
                 \end{eqnarray}$$   
             </p>
             <p>
@@ -210,7 +210,7 @@
                 <ul>
                     <li>\(A\) is an \(n \times n\) matrix where the \(i,j\) entry is \(c(i,j)\cos(\theta_i - \theta_j)\),</li>
                     <li>\(\boldsymbol{x}\) is the vector of \(\ddot{\theta}_i\)'s,</li>
-                    <li>and \(\boldsymbol{b}\) is the vector of values \(g(n - i + 1)\dot{\theta}_i\sin\theta_i + \sum_{j=1}^{n}c(i,j)\dot{\theta}_j^2\sin(\theta_i - \theta_j)\) </li>
+                    <li>and \(\boldsymbol{b}\) is the vector of values \(-\sum_{j=1}^{n}\left[c(i,j)\dot{\theta}_j^2\sin(\theta_i - \theta_j)\right] - g(n - i + 1)\sin\theta_i\) </li>
                 </ul> 
             </p>
             <p>
