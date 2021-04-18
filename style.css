@@ -85,3 +85,16 @@ img {
 .nowrap {
     white-space: nowrap;
 }
+
+.center {
+    margin:auto;
+    display:block;
+}
+
+.coffee {
+    background: #5F7FFF;
+    padding: .5rem;
+    border-radius:5px;
+    color: white;
+    text-decoration: none;
+}
