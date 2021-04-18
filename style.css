@@ -81,3 +81,7 @@ img {
     display: block;
     margin: auto;
 }
+
+.nowrap {
+    white-space: nowrap;
+}

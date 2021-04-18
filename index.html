@@ -320,6 +320,7 @@
                 The <code>pendulum.js</code> file will contain all the code that handles the pendulum simulation math, and <code>index.js</code> will contain all the code 
                 responsible for displaying and animating the simulation in our browser. We will create those files now, starting with <code>pendulum.js</code>.
             </p>
+            <h2><code>pendulum.js</code></h2>
             <p>
                 We'll be using JavaScript <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes">classes</a> to define, in code, what it means to be
                 an n-tuple pendulum. We'll be using the class to store properties that the system needs, like the number of bobs \(n\), the current state of the pendulum, and
@@ -364,6 +365,305 @@
                 <li>and the <code>coordinates()</code> method returns the coordinates of the bobs.</li>
             </ul>
         </p>
+        <h3>The <code>constructor()</code> method</h3>
+        <p>
+            To create a new n-tuple pendulum, we'll need to know four things: the number of bobs \(n\), and the phase-space state of the pendulum, which we'll store in two 
+            parts: the \(\theta_i\) and \(\dot{\theta}_i\), and the gravitational constant \(g\). To make our lives easier, we'll also give default values: \(n = 5\), 
+            \(\theta_i = \frac{\pi}{2}\), \(\dot{\theta}_i = 0\) and \(g = 9.8\).
+        </p>
+        <p>
+            We'll use the following code to do so:
+            <pre>
+<code>constructor(
+    n = 5, 
+    thetas = Array(n).fill(0.5*Math.PI), 
+    thetaDots = Array(n).fill(0), 
+    g = -9.8
+) {
+    this.n = n;
+    this.thetas = thetas;
+    this.thetaDots = thetaDots;
+    this.g = g;
+}</code>
+            </pre>
+        </p>
+        <h3>The <code>A()</code> method</h3>
+        <p>
+            The \(A\) matrix only depends on \(\theta_i\) values, so we'll add <code>thetas</code> as the input parameter. We'll then create the \(A\) matrix as an array of arrays
+            using <code>for</code> loops.
+        </p>
+        <pre>
+<code>A(thetas) {
+    let M = [];
+    for (let i = 0; i < this.n; i++) {
+        let row = [];
+        for (let j = 0; j < this.n; j++) {
+            row.push((this.n - Math.max(i, j)) * Math.cos(thetas[i] - thetas[j]));
+        }
+        M.push(row)
+    }
+    return M;
+}</code>
+        </pre>
+        <h3>The <code>b()</code> method</h3>
+        <p>
+            The \(b\) vector depends on \(\theta_i\) values, \(\dot{\theta_i}\) values, and the gravitational constant \(g\). Since \(g\) is already defined as a property of the
+            system, we just need to send \(\theta_i\) and \(\dot{\theta_i}\) as parameters. Similar to how we built \(A\), we'll use <code>for</code> loops to calculate the values
+            of the vector.
+        </p>
+        <pre>
+<code>b(thetas, thetaDots) {
+    let v = [];
+    for (let i = 0; i < this.n; i++) {
+        let b_i = 0;
+        for (let j = 0; j < this.n; j++) {
+            b_i -= (this.n - Math.max(i, j)) * Math.sin(thetas[i] - thetas[j]) * thetaDots[j] ** 2;
+        }
+        b_i -= this.g * (this.n - i) * Math.sin(thetas[i]);
+        v.push(b_i);
+    }
+    return v;
+}</code>
+        </pre>
+        <h3>The <code>f()</code> method</h3>
+        <p>
+            The \(f\) function depends on \(\theta_i\) values, \(\dot{\theta_i}\) values, so we'll send them in as parameters. To calculate the \(\ddot{\theta}_i\) values, we'll
+            use the <code>lusolve()</code> method from <code>math.js</code>. Because of how <code>math.js</code> returns the values, we'll need to extract the values from singleton
+            arrays with <code class="nowrap">map(x => x[0])</code>.
+        </p>
+        <pre>
+<code>f(thetas, thetaDots) {
+    let A = this.A(thetas);
+    let b = this.b(thetas, thetaDots);
+    return [thetaDots, math.lusolve(A, b).map(x => x[0])];
+}</code>
+        </pre>
+        <h3>The <code>RK4()</code> method</h3>
+        <p>
+            The RK4 method requires a timestep \(\Delta t\), \(\theta_i\) values, \(\dot{\theta_i}\) values. We can use the <code>math.add()</code> method to make adding the 
+            different vectors together a little bit easier, but I've used the <code>map()</code> method to handle the scalar value multiplication.
+        </p>
+        <pre>
+<code>RK4(dt, thetas, thetaDots) {
+    let k1 = this.f(thetas, thetaDots);
+    let k2 = this.f(math.add(thetas, k1[0].map(x => 0.5*dt*x)), math.add(thetaDots, k1[1].map(x => 0.5*dt*x)));
+    let k3 = this.f(math.add(thetas, k2[0].map(x => 0.5*dt*x)), math.add(thetaDots, k2[1].map(x => 0.5*dt*x)));
+    let k4 = this.f(math.add(thetas, k3[0].map(x => 1.0*dt*x)), math.add(thetaDots, k3[1].map(x => 1.0*dt*x)));
+
+    let thetaDeltas    = math.add(k1[0], k2[0].map(x => 2 * x), k3[0].map(x => 2 * x), k4[0]).map(x => x * dt/6);
+    let thetaDotDeltas = math.add(k1[1], k2[1].map(x => 2 * x), k3[1].map(x => 2 * x), k4[1]).map(x => x * dt/6);
+
+    return [math.add(thetas, thetaDeltas), thetaDots = math.add(thetaDots, thetaDotDeltas)]
+}</code>
+        </pre>
+        <h3>The <code>tick()</code> method</h3>
+        <p>
+            Now, most of the hard work is done! The <code>tick()</code> method just needs to take in a \(\Delta t\) value, and rewrite the current state of <code>thetas</code>
+            and <code>thetaDots</code>.
+        </p>
+        <pre>
+<code>tick(dt) {
+    let newState = this.RK4(dt, this.thetas, this.thetaDots);
+    this.thetas = newState[0];
+    this.thetaDots = newState[1];
+}</code>
+        </pre>
+        <h3>The <code>coordinates()</code> method</h3>
+        <p>
+            The last of the heavy math is here. We need to convert the current \(\theta_i\) of the pendulum state into \(x_i\) and \(y_i\) coordinates. Note that for this method,
+            we are using the <code>get</code> keyword, which means when we instantiate our pendulum, we can "get" the coordinates of the object as if they were a property. This
+            method only relies on internal values from the object, so we do not need to send any parameters.
+        </p>
+        <p>
+            We do need to create, and return, a vector of the bob coordinates, so we start with an empty array, and push elements to it inside of a for loop. 
+        </p>
+        <pre>
+<code>get coordinates() {
+    let x = 0;
+    let y = 0;
+    let coords = [];
+    for (let i = 0; i < this.thetas.length; i++) {
+        let theta = this.thetas[i]
+        x += Math.sin(theta);
+        y += Math.cos(theta);
+        coords.push({x:x, y:y})
+    }
+    return coords;
+}</code>
+        </pre>
+        <p>
+            The <code>Pendulum</code> class is now completed! Your <code>pendulum.js</code> file should look like
+            <pre>
+<code>class Pendulum {
+    constructor(
+        n = 5, 
+        thetas = Array(n).fill(0.5*Math.PI), 
+        thetaDots = Array(n).fill(0), 
+        g = -9.8
+    ) {
+        this.n = n;
+        this.thetas = thetas;
+        this.thetaDots = thetaDots;
+        this.g = g;
+    }
+
+    A(thetas) {
+        let M = [];
+        for (let i = 0; i < this.n; i++) {
+            let row = [];
+            for (let j = 0; j < this.n; j++) {
+                row.push((this.n - Math.max(i, j)) * Math.cos(thetas[i] - thetas[j]));
+            }
+            M.push(row)
+        }
+        return M;
+    }
+    
+    b(thetas, thetaDots) {
+        let v = [];
+        for (let i = 0; i < this.n; i++) {
+            let b_i = 0;
+            for (let j = 0; j < this.n; j++) {
+                b_i -= (this.n - Math.max(i, j)) * Math.sin(thetas[i] - thetas[j]) * thetaDots[j] ** 2;
+            }
+            b_i -= this.g * (this.n - i) * Math.sin(thetas[i]);
+            v.push(b_i);
+        }
+        return v;
+    }
+    
+    f(thetas, thetaDots) {
+        let A = this.A(thetas);
+        let b = this.b(thetas, thetaDots);
+        return [thetaDots, math.lusolve(A, b).map(x => x[0])];
+    }
+    
+    RK4(dt, thetas, thetaDots) {
+        let k1 = this.f(thetas, thetaDots);
+        let k2 = this.f(thetas.map((x, i) => x + 0.5*dt*k1[0][i]), thetaDots.map((x, i) => x + 0.5*dt*k1[1][i]));
+        let k3 = this.f(thetas.map((x, i) => x + 0.5*dt*k2[0][i]), thetaDots.map((x, i) => x + 0.5*dt*k2[1][i]));
+        let k4 = this.f(thetas.map((x, i) => x +     dt*k3[0][i]), thetaDots.map((x, i) => x +     dt*k3[1][i]));
+  
+        let thetaDeltas    = math.add(k1[0], k2[0].map(x => 2 * x), k3[0].map(x => 2 * x), k4[0]).map(x => x * dt/6);
+        let thetaDotDeltas = math.add(k1[1], k2[1].map(x => 2 * x), k3[1].map(x => 2 * x), k4[1]).map(x => x * dt/6);
+    
+        return [math.add(thetas, thetaDeltas), thetaDots = math.add(thetaDots, thetaDotDeltas)]
+    }
+
+    tick(dt) {
+        let thetas = this.thetas;
+        let thetaDots = this.thetaDots;
+
+        let newState = this.RK4(dt, thetas, thetaDots);
+        this.thetas = newState[0];
+        this.thetaDots = newState[1];
+    }
+
+    get coordinates() {
+        let x = 0;
+        let y = 0;
+        let coords = [];
+        for (let i = 0; i < this.thetas.length; i++) {
+            let theta = this.thetas[i]
+            x += Math.sin(theta);
+            y += Math.cos(theta);
+            coords.push({x:x, y:y})
+        }
+        return coords;
+    }
+}</code>
+            </pre>
+        </p>
+        <p>
+            Now that we're done with the <code>Pendulum</code> class, we can finish up with the <code>index.js</code> file and make a running simulation!
+        </p>     
+        <h2><code>index.js</code></h2>
+        <p>Here's our gameplan for <code>index.js</code>.
+            <ul>
+                <li>First, we need to instantiate a pendulum object from the <code>Pendulum</code> class,</li>
+                <li>then, we'll make a reference to the canvas element,</li>
+                <li>next, we'll create a function that draws the current state of the n-tuple pendulum, and</li>
+                <li>finally, we'll animate the draw function.</li>
+            </ul>
+        </p>
+        <h3>Instantiate pendulum object</h3>
+        <p>
+            Lorem ipsum
+        </p>
+        <pre>
+<code></code>
+        </pre>
+        <h3>Reference the canvas element</h3>
+        <p>
+            Lorem ipsum
+        </p>
+        <pre>
+<code></code>
+        </pre>
+        <h3>Create <code>draw</code> function</h3>
+        <p>
+            Lorem ipsum
+        </p>
+        <pre>
+<code></code>
+        </pre>
+        <h3>Animate</h3>
+        <p>
+            Lorem ipsum
+        </p>
+        <pre>
+<code></code>
+        </pre>
+        <p>
+            And with that, your <code>index.js</code> file is complete! Your code should look like
+            <pre>
+<code>let pendulum = new Pendulum();
+
+    let canvas = document.getElementById('canvas');
+    let context = canvas.getContext('2d');
+    
+    var xScale = x => x * (200/pendulum.n);
+    var yScale = x => -x * (200/pendulum.n);
+    
+    
+    function draw() {
+        pendulum.tick(1/60);
+        let coords = pendulum.coordinates;
+    
+        context.clearRect(0, 0, canvas.width, canvas.height);
+    
+        let x1 = 0.5*canvas.width;
+        let y1 = 0.5*canvas.height    
+    
+        for (let i = 0; i < pendulum.n; i++) {
+            let x2 = 0.5*canvas.width + xScale(coords[i].x);
+            let y2 = 0.5*canvas.height + yScale(coords[i].y);
+    
+            context.fillStyle = 'red';
+            context.strokeStyle = 'black';
+            context.lineWidth = 2;
+            context.beginPath();
+            context.moveTo(x1, y1);
+            context.lineTo(x2, y2);
+            context.stroke();
+    
+            context.beginPath();
+            context.arc(x2, y2, 3, 0, Math.PI * 2, true);
+            context.fill();
+    
+            x1 = x2;
+            y1 = y2;
+        }
+    
+        requestAnimationFrame(draw);
+    }
+    
+    requestAnimationFrame(draw);</code>
+        </pre>
+        </p>
+        <p>
+            And that's it! You should be able to open <code>index.html</code> in your modern browser of choice, and see a quintuple pendulum being animated in real time. 
+            Congratulations!</p>
         </section>
         <section id="footnotes">
             <hr>

@@ -1,14 +1,12 @@
-let n = 5;
-
-let pendulum = new Pendulum(n);
+let pendulum = new Pendulum();
 
 pendulum.tick(1/60)
 
 let canvas = document.getElementById('canvas');
 let context = canvas.getContext('2d');
 
-var xScale = x => x * (175/n);
-var yScale = x => -x * (175/n);
+var xScale = x => x * (175/pendulum.n);
+var yScale = x => -x * (175/pendulum.n);
 
 
 function draw() {
@@ -20,7 +18,7 @@ function draw() {
     let x1 = 0.5*canvas.width;
     let y1 = 0.5*canvas.height    
 
-    for (let i = 0; i < n; i++) {
+    for (let i = 0; i < pendulum.n; i++) {
         let x2 = 0.5*canvas.width + xScale(coords[i].x);
         let y2 = 0.5*canvas.height + yScale(coords[i].y);
 
