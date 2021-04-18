@@ -37,25 +37,27 @@ class Pendulum {
         return [thetaDots, math.lusolve(A, b).map(x => x[0])];
     }
     
-    RK4(dt, thetas, thetaDots) {
-        let k1 = this.fDot(thetas, thetaDots);
-        let k2 = this.fDot(thetas.map((x, i) => x + 0.5*dt*k1[0][i]), thetaDots.map((x, i) => x + 0.5*dt*k1[1][i]));
-        let k3 = this.fDot(thetas.map((x, i) => x + 0.5*dt*k2[0][i]), thetaDots.map((x, i) => x + 0.5*dt*k2[1][i]));
-        let k4 = this.fDot(thetas.map((x, i) => x +     dt*k3[0][i]), thetaDots.map((x, i) => x +     dt*k3[1][i]));
+    // RK4(dt, thetas, thetaDots) {
+    //     let k1 = this.fDot(thetas, thetaDots);
+    //     let k2 = this.fDot(thetas.map((x, i) => x + 0.5*dt*k1[0][i]), thetaDots.map((x, i) => x + 0.5*dt*k1[1][i]));
+    //     let k3 = this.fDot(thetas.map((x, i) => x + 0.5*dt*k2[0][i]), thetaDots.map((x, i) => x + 0.5*dt*k2[1][i]));
+    //     let k4 = this.fDot(thetas.map((x, i) => x +     dt*k3[0][i]), thetaDots.map((x, i) => x +     dt*k3[1][i]));
   
-        let thetaDeltas    = math.add(k1[0], k2[0].map(x => 2 * x), k3[0].map(x => 2 * x), k4[0]).map(x => x * dt/6);
-        let thetaDotDeltas = math.add(k1[1], k2[1].map(x => 2 * x), k3[1].map(x => 2 * x), k4[1]).map(x => x * dt/6);
+    //     let thetaDeltas    = math.add(k1[0], k2[0].map(x => 2 * x), k3[0].map(x => 2 * x), k4[0]).map(x => x * dt/6);
+    //     let thetaDotDeltas = math.add(k1[1], k2[1].map(x => 2 * x), k3[1].map(x => 2 * x), k4[1]).map(x => x * dt/6);
     
-        return [math.add(thetas, thetaDeltas), thetaDots = math.add(thetaDots, thetaDotDeltas)]
-    }
+    //     return [math.add(thetas, thetaDeltas), thetaDots = math.add(thetaDots, thetaDotDeltas)]
+    // }
+    
 
-    tick(dt) {
+    tick(dt = 1/60) {
         let thetas = this.thetas;
         let thetaDots = this.thetaDots;
 
-        let newState = this.RK4(dt, thetas, thetaDots);
-        this.thetas = newState[0];
-        this.thetaDots = newState[1];
+        let stateDerivative = this.fDot(thetas, thetaDots);
+        console.log(stateDerivative);
+        this.thetas = math.add(this.thetas, stateDerivative[0].map(x => x * dt))
+        this.thetaDots = math.add(this.thetaDots, stateDerivative[1].map(x => x * dt))
     }
 
     get coordinates() {
@@ -70,4 +72,5 @@ class Pendulum {
         }
         return coords;
     }
+
 }

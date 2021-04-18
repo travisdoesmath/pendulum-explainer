@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="style.css">
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/9.3.2/math.min.js"></script>
     <script src="https://d3js.org/d3.v6.min.js"></script>
 </head>
 <body>
@@ -25,18 +26,20 @@
             <p>We will be building a simulator that runs on a webpage and animates the movement of an n-tuple pendulum.</p>
             <ul>
                 <li>First, we will define the physical system that describes the motion of an n-tuple pendulum.</li>
-                <li>Then we will create a JavaScript program that solves the equations of motion and animates a given n-tuple pendulum.</li>
-                <li>Finally, we will speed up the simulation by moving the math out of JavaScript and into WebAssembly, using the Rust programming language.</li>
+                <li>Second, we will create a JavaScript program that solves the equations of motion and animates a given n-tuple pendulum.</li>
             </ul>
+            <figure>
+                <canvas id="canvas" width="400", height="400"></canvas>
+                <figcaption>A real-time simulation of a quintuple pendulum</figcaption>
+            </figure>
         </section>
         <section id="overview-technobabble">
             <h2>Overview (in techno-babble)</h2>
             <p>We will be building a simulator that runs on a webpage and animates the movement of an n-tuple pendulum.</p>
             <ul>
                 <li>First, we will use a Lagrangian formulation to describe the equations of motion for an n-tuple pendulum. For ease of coding and solving, the equations of motion will be defined in a matrix equation \(Ax = b\).</li>
-                <li>Then we will create a JavaScript program that uses a Runge-Kutta method (RK4) to numerically solve the system of differential equations obtained in step 1 and 
+                <li>Second, we will create a JavaScript program that uses a Runge-Kutta method (RK4) to numerically solve the system of differential equations obtained in step 1 and 
                     animate the simulation using the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/canvas">canvas element</a></li>
-                <li>Finally, we will speed up the simulation by moving the RK4 solver out of JavaScript and into Rust, targeting WebAssembly</li>
             </ul>
         </section>
         <section id="but-why">
@@ -52,7 +55,7 @@
                 \(n = 3\), so we might as well just do the little bit of extra work and figure out the general case.
             </p>
         </section>
-        <section id="lets-go">
+        <section id="lets-go" class="green aside">
             <h2>Let's go!</h2>
         </section>
         <section id="equations-of-motion">
@@ -214,11 +217,61 @@
                 </ul> 
             </p>
             <p>
-                With the equations of motion defined, we can now move to coding the n-tuple pendulum simulation in JavaScript. Whew!
+                Remember, we are using the phase space of angles (\(\theta_i\)) and angle velocities (\(\dot{\theta}_i\)) to represent the possible states of the n-tuple pendulum
+                system. To approximate the next state, we'll need the derivatives: \(\dot{\theta}_i\) and \(\ddot{\theta}_i\). Luckily, if we know the current state, we know the 
+                \(\dot{\theta}_i\), and we can solve the matrix equation we just defined to get the \(\ddot{\theta}_i\).
             </p>
+            <p>
+                For the next bit, we'll need a function \(f\) that takes in the current state of the n-tuple pendulum and returns the derivates, that is
+                $$ f \left( \begin{matrix}\theta_1 \\ \vdots \\ \theta_n \\ \dot{\theta}_1 \\ \vdots \\ \dot{\theta}_n \end{matrix} \right) = 
+                     \left( \begin{matrix}\dot{\theta}_1 \\ \vdots \\ \dot{\theta}_n \\ \ddot{\theta}_1 \\ \vdots \\ \ddot{\theta}_n \end{matrix} \right) $$
+            </p>
+            <p>
+                You might be thinking that we can find the next state of the pendulum system by taking a small change in time (\(\Delta t\)), multiplying the derivatives of the 
+                state values by \(\Delta t\), and adding the resulting changes to the current state values. In other words (or at least a lot of notation),
+
+                $$
+                    \left( \begin{matrix}\theta_1 \\ \vdots \\ \theta_n \\ \dot{\theta}_1 \\ \vdots \\ \dot{\theta}_n \end{matrix} \right) \rightarrow 
+                    \left( \begin{matrix}\theta_1 \\ \vdots \\ \theta_n \\ \dot{\theta}_1 \\ \vdots \\ \dot{\theta}_n \end{matrix} \right) + \Delta t 
+                    \left( \begin{matrix}\dot{\theta}_1 \\ \vdots \\ \dot{\theta}_n \\ \ddot{\theta}_1 \\ \vdots \\ \ddot{\theta}_n \end{matrix} \right)
+                $$
+
+                
+                If so, you're thinking along the same lines as 
+                <a href="https://en.wikipedia.org/wiki/Euler_method">one of the greatest mathematicians ever</a>, but unfortunately, because the n-tuple pendulums are chaotic 
+                systems, we will need a more sophisticated method. We will be using the 
+                <a href="https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods#The_Runge%E2%80%93Kutta_method">4th order Runge-Kutta (RK4) method</a>. 
+
+                To keep notation compact, lets define \(s_t\) to be the state at time \(t\). We can then rewrite the previous expression as
+
+                $$ s_{t + \Delta t} = s_{t} + \Delta tf(s_t) $$
+            </p>
+            <p>
+                We won't go into the details of RK4 or exactly how it works (the rough idea is that it takes weighted averages of slopes across the \(\Delta t\) interval), but the 
+                process is as follows:
+
+                $$
+                    \begin{eqnarray} 
+                    k_1 &=& f(s_t) \\
+                    k_2 &=& f(s_t + \frac{\Delta t}{2} k_1 ) \\
+                    k_3 &=& f(s_t + \frac{\Delta t}{2} k_2 ) \\
+                    k_4 &=& f(s_t + \Delta tk_3 )
+                    \end{eqnarray}
+                $$
+
+                $$ s_{t + \Delta t} \approx \frac{\Delta t}{6}(k_1 + 2k_2 + 2k_3 + k4) $$
+
+            </p>
+            <p>
+                With that, we have everything we need to start coding the n-tuple pendulum simulation in JavaScript. Whew!
+            </p>
+        </section>
+        <section id="lets-code" class="green aside">
+            <h2>Let's code!</h2>
         </section>
         <section id="javascript">
             <h2>Step 2: Coding it up in JavaScript</h2>
+            <p><em>Note, if you want to jump ahead and see how this is coded, the pendulum at the top of the page is using the <a href="example">example code</a>!</em></p>
             <p>
                 For this section, we're going to write all of our code for the browser, which means all you need is a text editor (I recommend 
                 <a href="https://code.visualstudio.com/">Visual Studio Code</a>, which is free and works well on Mac and Windows), and a browser, which you're probably using to 
@@ -235,7 +288,7 @@
                 following HTML code, and save.
             </p>
                 
-                <pre>
+            <pre>
 <code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html lang="en"&gt;
 &lt;head&gt;
@@ -251,7 +304,7 @@
     &lt;script src="index.js"&gt;&lt;/script&gt;
 &lt;/body&gt;
 &lt;/html&gt;</code>
-                </pre>
+            </pre>
             <p>
                 Note that in VS Code, most of this code is boilerplate code that can be created with the <a href="https://code.visualstudio.com/docs/editor/emmet">Emmet 
                 abbreviation</a> <code class="inline-code">!</code>.
@@ -265,8 +318,52 @@
                     <li>and calls two JavaScript files: <code>pendulum.js</code> and <code>index.js</code></li>.
                 </ul>
                 The <code>pendulum.js</code> file will contain all the code that handles the pendulum simulation math, and <code>index.js</code> will contain all the code 
-                responsible for displaying and animating the simulation in our browser. We will create those files now.
+                responsible for displaying and animating the simulation in our browser. We will create those files now, starting with <code>pendulum.js</code>.
             </p>
+            <p>
+                We'll be using JavaScript <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes">classes</a> to define, in code, what it means to be
+                an n-tuple pendulum. We'll be using the class to store properties that the system needs, like the number of bobs \(n\), the current state of the pendulum, and
+                even the gravitation constant. We'll also define functions, or methods, like creating the \(A\) matrix for each state, and the coordinates of the bobs. Let's start
+                with a skeleton of everything that we'll need, and fill in the details one-by-one.
+            </p>
+            <pre>
+<code class="language-javascript">class Pendulum {
+    constructor() {
+    }
+
+    A() {
+    }
+    
+    b() {
+    }
+    
+    f() {
+    }
+    
+    RK4() {
+    }    
+
+    tick() {
+    }
+
+    get coordinates() {
+    }
+
+}
+</code>
+            </pre>
+        <p>
+            We'll be using this class to create an <em>instance</em> of a pendulum. The <code>constructor()</code> method will define how the instance is constructed and store the 
+            starting state of the system. The other methods perform the following tasks:
+            <ul>
+                <li>the <code>A()</code> method will create the matrix \(A\) from our equations of motion,</li>
+                <li>the <code>b()</code> method creates the vector \(b\) from our equations of motion,</li>
+                <li>the <code>f()</code> method calculates the derivative of the current state values,</li>
+                <li>the <code>RK4()</code> method performs the Runge-Kutta algorithm,</li>
+                <li>the <code>tick()</code> method updates the state of the system,</li>
+                <li>and the <code>coordinates()</code> method returns the coordinates of the bobs.</li>
+            </ul>
+        </p>
         </section>
         <section id="footnotes">
             <hr>
@@ -275,6 +372,7 @@
         </section>
     </div>
     <script>hljs.highlightAll();</script>
+    <script src="example/pendulum.js"></script>
     <script src="main.js"></script>
 </body>
 </html>

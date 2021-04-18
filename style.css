@@ -32,6 +32,12 @@ h1, h2 {
     text-rendering: optimizeLegibility;
 }
 
+#canvas {
+    display:block;
+    margin:auto;
+    border: thin solid black;
+}
+
 figure {
     display: flex;
     flex-flow: column;
@@ -58,11 +64,11 @@ figcaption {
     padding: 1rem;
 }
 
-#lets-go {
+.green {
     background-color: #AFA;
 }
 
-#lets-go>h2 {
+.aside>h2 {
     padding: 1rem;
 }
 
