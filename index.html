@@ -130,7 +130,7 @@
             <p>
                 Now we are ready to describe the equations of motion for the n-tuple pendulum.
             </p>
-            <h3>Lagrangian formulation of the n-tuple pendulum<sup><a href="#footnote-1">[1]</a></sup></h3>
+            <h3>Lagrangian formulation of the n-tuple pendulum<sup><a href="#footnote-1" id="footnote-1-referrer">[1]</a></sup></h3>
             <p>
                 For this simulation, we are describing a frictionless physical system of rods with zero mass and \(n\) bobs of equal mass. This means that the \(n\) bobs are the only 
                 point masses of the system. For ease of calculation, the length of each rod and the mass of each bob are defined as \(1\) appropriate arbitrary unit. The gravitational 
@@ -540,10 +540,10 @@
     
     RK4(dt, thetas, thetaDots) {
         let k1 = this.f(thetas, thetaDots);
-        let k2 = this.f(thetas.map((x, i) => x + 0.5*dt*k1[0][i]), thetaDots.map((x, i) => x + 0.5*dt*k1[1][i]));
-        let k3 = this.f(thetas.map((x, i) => x + 0.5*dt*k2[0][i]), thetaDots.map((x, i) => x + 0.5*dt*k2[1][i]));
-        let k4 = this.f(thetas.map((x, i) => x +     dt*k3[0][i]), thetaDots.map((x, i) => x +     dt*k3[1][i]));
-  
+        let k2 = this.f(math.add(thetas, k1[0].map(x => 0.5*dt*x)), math.add(thetaDots, k1[1].map(x => 0.5*dt*x)));
+        let k3 = this.f(math.add(thetas, k2[0].map(x => 0.5*dt*x)), math.add(thetaDots, k2[1].map(x => 0.5*dt*x)));
+        let k4 = this.f(math.add(thetas, k3[0].map(x => 1.0*dt*x)), math.add(thetaDots, k3[1].map(x => 1.0*dt*x)));
+ 
         let thetaDeltas    = math.add(k1[0], k2[0].map(x => 2 * x), k3[0].map(x => 2 * x), k4[0]).map(x => x * dt/6);
         let thetaDotDeltas = math.add(k1[1], k2[1].map(x => 2 * x), k3[1].map(x => 2 * x), k4[1]).map(x => x * dt/6);
     
@@ -551,10 +551,7 @@
     }
 
     tick(dt) {
-        let thetas = this.thetas;
-        let thetaDots = this.thetaDots;
-
-        let newState = this.RK4(dt, thetas, thetaDots);
+        let newState = this.RK4(dt, this.thetas, this.thetaDots);
         this.thetas = newState[0];
         this.thetaDots = newState[1];
     }
@@ -588,32 +585,134 @@
         </p>
         <h3>Instantiate pendulum object</h3>
         <p>
-            Lorem ipsum
+            We did all of the hard work in creating the <code>Pendulum</code> class, so this part is now easy. 
         </p>
         <pre>
-<code></code>
+<code>let pendulum = new Pendulum();</code>
         </pre>
         <h3>Reference the canvas element</h3>
         <p>
-            Lorem ipsum
+            Here, we select the <code>canvas</code> element with the <code>getElementById()</code> method. We also need to establish a drawing context on the canvas; since we're
+            drawing a two-dimensional representation, we create the <code>"2d"</code> context connected to the <code>canvas</code> element.
         </p>
         <pre>
-<code></code>
+<code>let canvas = document.getElementById('canvas');
+let context = canvas.getContext('2d');</code>
         </pre>
-        <h3>Create <code>draw</code> function</h3>
+        <h3>Create <code>draw()</code> function</h3>
         <p>
-            Lorem ipsum
+            Before we can create the <code>draw()</code> function, we'll need to scale the output of our pendulum to fit the canvas. We'll do this with two scale functions:
+            <code>xScale()</code> and <code>yScale()</code>
         </p>
         <pre>
-<code></code>
+<code>var xScale = x => x * (0.5*canvas.width/pendulum.n);
+var yScale = x => -x * (0.5*canvas.height/pendulum.n);</code>
+        </pre>
+        <p>
+            Note that the <code>yScale()</code> function flips the sign, because when drawing on the <code>canvas</code>, <code>y</code> starts at <code>0</code> at the 
+            <em>top</em> of the <code>canvas</code>, and as <code>y</code> increases, it goes <em>down</em>. We've done all our math and coding with the assumption that as 
+            <code>y</code> increases, it moves <em>up</em>, so we need to flip the sign.
+        </p>
+        <p>
+            Now we can start filling in the <code>draw()</code> function. First, we need to get the current coordinates from the <code>pendulum</code> instance. Then we will
+            initialize the first coordinates at the center of the canvas.
+        </p>
+        <pre>
+<code>function draw() {
+    let coords = pendulum.coordinates;
+
+    let x1 = 0.5*canvas.width;
+    let y1 = 0.5*canvas.height    
+}</code>
+        </pre>
+        <p>
+            Next, we will create a <code>for</code> loop to go through all the pendulum coordinates, and set the new screen coordinates. (Remember, this is still inside the 
+        <code>draw()</code> function).
+        </p>
+        <pre>
+<code>    for (let i = 0; i < pendulum.n; i++) {
+        let x2 = 0.5*canvas.width + xScale(coords[i].x);
+        let y2 = 0.5*canvas.height + yScale(coords[i].y);
+    }</code>
+        </pre>
+        <p>
+            Now we will use the <code>canvas</code> functions to draw the rod and bob for the current coordinate in the for loop.
+        </p>
+        <pre>
+<code>        context.fillStyle = 'red';
+        context.strokeStyle = 'black';
+        context.lineWidth = 2;
+        context.beginPath();
+        context.moveTo(x1, y1);
+        context.lineTo(x2, y2);
+        context.stroke();
+
+        context.beginPath();
+        context.arc(x2, y2, 3, 0, Math.PI * 2, true);
+        context.fill();</code>
+        </pre>
+        <p>
+            Finally, at the end of the <code>for</code> loop, we will set <code>x1</code> and <code>y1</code> to the current coordinates, so they will become the new starting
+            points in the next iteration.
+        </p>
+        <pre>
+<code>        x1 = x2;
+        y1 = y2;
+</code>
+        </pre>
+        <p>Our <code>draw()</code> function is now complete! It should look like</p>
+        <pre>
+<code>function draw() {
+    let coords = pendulum.coordinates;
+
+    let x1 = 0.5*canvas.width;
+    let y1 = 0.5*canvas.height    
+
+    for (let i = 0; i < pendulum.n; i++) {
+        let x2 = 0.5*canvas.width + xScale(coords[i].x);
+        let y2 = 0.5*canvas.height + yScale(coords[i].y);
+
+        context.fillStyle = 'red';
+        context.strokeStyle = 'black';
+        context.lineWidth = 2;
+        context.beginPath();
+        context.moveTo(x1, y1);
+        context.lineTo(x2, y2);
+        context.stroke();
+
+        context.beginPath();
+        context.arc(x2, y2, 3, 0, Math.PI * 2, true);
+        context.fill();
+
+        x1 = x2;
+        y1 = y2;
+    }
+}</code>
         </pre>
         <h3>Animate</h3>
         <p>
-            Lorem ipsum
+            Finally, we will create a function to handle the animation. This function will
+            <ul>
+                <li>Clear the canvas,</li>
+                <li>Call the <code>draw()</code> function,</li>
+                <li>Call the <code>tick()</code> method on the <code>pendulum</code> instance,</li>
+                <li>And call itself within a <code>requestAnimationFrame()</code> function<sup><a href="#footnote-2" id="footnote-2-referrer">[2]</a></sup></li>
+            </ul>
+            The code to do so is
         </p>
         <pre>
-<code></code>
+<code>function animate() {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    draw();
+    pendulum.tick(1/60);
+    requestAnimationFrame(animate);
+}</code>
         </pre>
+        <p>the last thing we need to do is call the <code>animate()</code> function, which we will do inside a <code>requestAnimationFrame()</code> call.</p>
+        <pre>
+<code>requestAnimationFrame(animate);</code>
+        </pre>
+
         <p>
             And with that, your <code>index.js</code> file is complete! Your code should look like
             <pre>
@@ -622,15 +721,11 @@
     let canvas = document.getElementById('canvas');
     let context = canvas.getContext('2d');
     
-    var xScale = x => x * (200/pendulum.n);
-    var yScale = x => -x * (200/pendulum.n);
-    
+    var xScale = x => x * (0.5*canvas.width/pendulum.n);
+    var yScale = x => -x * (0.5*canvas.height/pendulum.n);
     
     function draw() {
-        pendulum.tick(1/60);
         let coords = pendulum.coordinates;
-    
-        context.clearRect(0, 0, canvas.width, canvas.height);
     
         let x1 = 0.5*canvas.width;
         let y1 = 0.5*canvas.height    
@@ -654,21 +749,30 @@
             x1 = x2;
             y1 = y2;
         }
-    
-        requestAnimationFrame(draw);
     }
     
-    requestAnimationFrame(draw);</code>
+    function animate() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        draw();
+        pendulum.tick(1/60);
+        requestAnimationFrame(animate);
+    }
+    
+    requestAnimationFrame(animate);</code>
         </pre>
         </p>
         <p>
             And that's it! You should be able to open <code>index.html</code> in your modern browser of choice, and see a quintuple pendulum being animated in real time. 
-            Congratulations!</p>
+        </p>
+        </section>
+        <section id="congrats" class="green aside">
+            <h2>Congratulations!</h2>
         </section>
         <section id="footnotes">
             <hr>
             <h4>Footnotes</h4>
-            <span id="footnote-1"><sup>[1]</sup>This derivation is indebted to <a href="https://diego.assencio.com/?index=1500c66ae7ab27bb0106467c68feebc6#post_1500c66ae7ab27bb0106467c68feebc6_fig_1">Diego Assencio's derivation of the Lagrangian for the double pendulum</a></span>
+            <p id="footnote-1"><sup><a href="#footnote-1-referrer">[1]</a></sup>This derivation is indebted to <a href="https://diego.assencio.com/?index=1500c66ae7ab27bb0106467c68feebc6#post_1500c66ae7ab27bb0106467c68feebc6_fig_1">Diego Assencio's derivation of the Lagrangian for the double pendulum</a></p>
+            <p id="footnote-2"><sup><a href="#footnote-2-referrer">[2]</a></sup>More info about how <a href="https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame"><code>requestAnimationFrame()</code></a> works can be found at MDN.</p>
         </section>
     </div>
     <script>hljs.highlightAll();</script>

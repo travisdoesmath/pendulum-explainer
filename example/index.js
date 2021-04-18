@@ -3,15 +3,11 @@ let pendulum = new Pendulum();
 let canvas = document.getElementById('canvas');
 let context = canvas.getContext('2d');
 
-var xScale = x => x * (200/pendulum.n);
-var yScale = x => -x * (200/pendulum.n);
-
+var xScale = x => x * (0.5*canvas.width/pendulum.n);
+var yScale = x => -x * (0.5*canvas.height/pendulum.n);
 
 function draw() {
-    pendulum.tick(1/60);
     let coords = pendulum.coordinates;
-
-    context.clearRect(0, 0, canvas.width, canvas.height);
 
     let x1 = 0.5*canvas.width;
     let y1 = 0.5*canvas.height    
@@ -35,8 +31,13 @@ function draw() {
         x1 = x2;
         y1 = y2;
     }
-
-    requestAnimationFrame(draw);
 }
 
-requestAnimationFrame(draw);
+function animate() {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    draw();
+    pendulum.tick(1/60);
+    requestAnimationFrame(animate);
+}
+
+requestAnimationFrame(animate);
